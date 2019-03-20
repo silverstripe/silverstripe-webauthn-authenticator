@@ -18,14 +18,12 @@ const PATHS = {
   DIST: Path.resolve('client/dist'),
 };
 
-const externals = externalJS(ENV, PATHS);
-delete externals.reactstrap;
-
 const config = [
   {
     name: 'js',
     entry: {
       bundle: `${PATHS.SRC}/bundles/bundle.js`,
+      injector: `${PATHS.MODULES}/@silverstripe/react-injector/dist/injector.js`,
     },
     output: {
       path: PATHS.DIST,
@@ -33,7 +31,9 @@ const config = [
     },
     devtool: (ENV !== 'production') ? 'source-map' : '',
     resolve: resolveJS(ENV, PATHS),
-    externals,
+    externals: {
+      'lib/Injector': 'Injector',
+    },
     module: moduleJS(ENV, PATHS),
     plugins: pluginJS(ENV, PATHS),
   },

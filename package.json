@@ -1,10 +1,9 @@
 {
-  "name": "silverstripe-module-skeleton",
-  "description": "Description of your module",
+  "name": "silverstripe-webauthn",
   "main": "./client/src/boot/index.js",
-  "author": "You",
+  "author": "SilverStripe Ltd",
   "engines": {
-    "node": ">=6.x"
+    "node": ">=10.x"
   },
   "scripts": {
     "build": "yarn && yarn lint && NODE_ENV=production webpack -p --bail --progress",
@@ -20,19 +19,19 @@
     "lint-sass": "sass-lint client/src"
   },
   "dependencies": {
-    "babel-polyfill": "6.7.4",
-    "jquery": "^3.1.1",
-    "mime": "^1.4.1",
-    "react": "15.3.1"
+    "@silverstripe/react-injector": "^0.1.2",
+    "classnames": "^2.2.6",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3"
   },
   "devDependencies": {
-    "@silverstripe/eslint-config": "^0.0.4",
-    "@silverstripe/webpack-config": "^0.8.0",
-    "babel-jest": "^20.0.3",
+    "@silverstripe/eslint-config": "^0.0.5",
+    "@silverstripe/webpack-config": "^0.12.0",
+    "babel-jest": "^23.6.0",
     "enzyme": "^3.3.0",
-    "enzyme-adapter-react-15.4": "^1.0.5",
-    "jest-cli": "^19.0.2",
-    "webpack": "^2"
+    "enzyme-adapter-react-16": "^1.10.0",
+    "jest-cli": "^23.6.0"
   },
   "babel": {
     "presets": [
@@ -48,13 +47,17 @@
       "client/src"
     ],
     "modulePaths": [
-      "client/src",
-      "../admin/client/src",
-      "../admin/node_modules",
-      "../silverstripe/admin/client/src",
-      "../silverstripe/admin/node_modules",
-      "../../silverstripe/admin/client/src",
-      "../../silverstripe/admin/node_modules"
+      "client/src"
+    ],
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/node_modules/**",
+      "!**/boot/**",
+      "!**/bundles/**",
+      "!**/legacy/**",
+      "!**/vendor/**",
+      "!**/*-test.{js,jsx}",
+      "!**/*-story.{js,jsx}"
     ],
     "testMatch": [
       "**/tests/**/*-test.js?(x)"

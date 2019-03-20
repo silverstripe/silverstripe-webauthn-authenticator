@@ -1,0 +1,6 @@
+---
+name: MFAWebAuthnAuthenticator
+---
+SilverStripe\MFA\Service\MethodRegistry:
+  methods:
+    webAuthn: SilverStripe\WebAuthn\Method

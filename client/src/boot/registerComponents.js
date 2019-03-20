@@ -1,7 +1,10 @@
 import Injector from 'lib/Injector';
+import WebAuthnRegister from 'components/Register';
+import WebAuthnLogin from 'components/Login';
 
 export default () => {
   Injector.component.registerMany({
-    // List your React components here so Injector is aware of them
+    WebAuthnRegister,
+    WebAuthnLogin,
   });
 };
