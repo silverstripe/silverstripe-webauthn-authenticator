@@ -1,6 +1,6 @@
 import Injector from 'lib/Injector';
-import WebAuthnRegister from 'components/Register';
-import WebAuthnLogin from 'components/Login';
+import WebAuthnRegister from 'components/WebAuthn/Register';
+import WebAuthnLogin from 'components/WebAuthn/Login';
 
 export default () => {
   Injector.component.registerMany({

@@ -1,1 +1,1 @@
-{"version":3,"sources":[],"names":[],"mappings":"","file":"styles/bundle.css","sourceRoot":""}
+{"version":3,"sources":["webpack:///./client/src/components/WebAuthn/Register.scss?2c53"],"names":[],"mappings":"AAAA,wBACE,8BACA","file":"styles/bundle.css","sourcesContent":[".mfa-register-web-authn {\n  display: grid;\n  grid-template-columns: auto auto;\n\n  &__image {\n\n  }\n}\n\n\n\n// WEBPACK FOOTER //\n// ./client/src/components/WebAuthn/Register.scss"],"sourceRoot":""}

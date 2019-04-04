@@ -4,14 +4,11 @@ import React, { Component } from 'react';
 import { base64ToByteArray, byteArrayToBase64 } from 'lib/convert';
 
 class Login extends Component {
-  componentDidMount() {
-    const { publicKey } = this.props;
+  constructor(props) {
+    super(props);
 
-    if (publicKey) {
-      this.initAuth();
-    }
+    this.handleStartAuth = this.handleStartAuth.bind(this);
   }
-
   initAuth() {
     const { publicKey, onCompleteLogin } = this.props;
 
@@ -47,6 +44,11 @@ class Login extends Component {
       });
   }
 
+  handleStartAuth(event) {
+    event.preventDefault();
+    this.initAuth();
+  }
+
   /**
    * Render a description for this input
    *
@@ -67,11 +69,15 @@ class Login extends Component {
 
 
   render() {
+    const { moreOptionsControl } = this.props;
+
     return (
       <form className="mfa-login-web-authn__container">
         <div className="mfa-login-web-authn__content">
           {this.renderDescription()}
         </div>
+        <button onClick={this.handleStartAuth}>Do it</button>
+        {moreOptionsControl}
         <div className="mfa-login-web-authn__icon" />
       </form>
     );

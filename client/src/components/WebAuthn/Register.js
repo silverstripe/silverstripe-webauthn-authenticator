@@ -26,7 +26,7 @@ class Register extends Component {
   }
 
   initAuth() {
-    const { keyData, handleCompleteRegistration } = this.props;
+    const { keyData, onCompleteRegistration } = this.props;
 
     const user = {
       ...keyData.user,
@@ -43,7 +43,7 @@ class Register extends Component {
 
     navigator.credentials.create({ publicKey: parsedKey })
       .then(response => {
-        handleCompleteRegistration({
+        onCompleteRegistration({
           credentials: btoa(JSON.stringify({
             id: response.id,
             type: response.type,

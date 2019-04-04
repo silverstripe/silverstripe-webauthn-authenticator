@@ -1,8 +1,8 @@
 const Path = require('path');
 const webpackConfig = require('@silverstripe/webpack-config');
+
 const {
   resolveJS,
-  externalJS,
   moduleJS,
   pluginJS,
   moduleCSS,
@@ -23,7 +23,6 @@ const config = [
     name: 'js',
     entry: {
       bundle: `${PATHS.SRC}/bundles/bundle.js`,
-      injector: `${PATHS.MODULES}/@silverstripe/react-injector/dist/injector.js`,
     },
     output: {
       path: PATHS.DIST,

@@ -147,7 +147,7 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         return _t(
             __CLASS__ . '.DESCRIPTION',
-            'A small USB device which is used for verifying you.'
+            'A small USB device which is used for verifying you'
         );
     }
 

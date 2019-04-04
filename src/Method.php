@@ -3,10 +3,12 @@
 namespace SilverStripe\WebAuthn;
 
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
 use SilverStripe\MFA\Method\MethodInterface;
 use SilverStripe\MFA\State\AvailableMethodDetailsInterface;
+use SilverStripe\View\Requirements;
 
 class Method implements MethodInterface
 {
@@ -43,5 +45,27 @@ class Method implements MethodInterface
     public function getDetails()
     {
         return Injector::inst()->create(AvailableMethodDetailsInterface::class, $this);
+    }
+
+    /**
+     * Return a URL to an image to be used as a thumbnail in the MFA login/registration grid for all MFA methods
+     *
+     * @return string
+     */
+    public function getThumbnail()
+    {
+        return ModuleLoader::getModule('silverstripe/webauthn')->getResource('client/dist/images/u2f.svg')->getURL();
+    }
+
+    /**
+     * Leverage the Requirements API to ensure client requirements are included. This is called just after the base
+     * module requirements are specified
+     *
+     * @return void
+     */
+    public function applyRequirements()
+    {
+        Requirements::javascript('silverstripe/webauthn: client/dist/js/bundle.js');
+        Requirements::css('silverstripe/webauthn: client/dist/styles/bundle.css');
     }
 }
