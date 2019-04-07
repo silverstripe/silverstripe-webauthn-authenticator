@@ -54,7 +54,9 @@ class Method implements MethodInterface
      */
     public function getThumbnail()
     {
-        return ModuleLoader::getModule('silverstripe/webauthn')->getResource('client/dist/images/u2f.svg')->getURL();
+        return ModuleLoader::getModule('silverstripe/webauthn-authenticator')
+            ->getResource('client/dist/images/u2f.svg')
+            ->getURL();
     }
 
     /**
@@ -65,7 +67,7 @@ class Method implements MethodInterface
      */
     public function applyRequirements()
     {
-        Requirements::javascript('silverstripe/webauthn: client/dist/js/bundle.js');
-        Requirements::css('silverstripe/webauthn: client/dist/styles/bundle.css');
+        Requirements::javascript('silverstripe/webauthn-authenticator: client/dist/js/bundle.js');
+        Requirements::css('silverstripe/webauthn-authenticator: client/dist/styles/bundle.css');
     }
 }
