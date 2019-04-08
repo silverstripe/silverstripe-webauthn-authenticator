@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace SilverStripe\WebAuthn;
 
@@ -17,7 +17,7 @@ class Method implements MethodInterface
      *
      * @return string
      */
-    public function getURLSegment()
+    public function getURLSegment(): string
     {
         return 'web-authn';
     }
@@ -27,7 +27,7 @@ class Method implements MethodInterface
      *
      * @return LoginHandlerInterface
      */
-    public function getLoginHandler()
+    public function getLoginHandler(): LoginHandlerInterface
     {
         return Injector::inst()->create(LoginHandler::class);
     }
@@ -37,12 +37,12 @@ class Method implements MethodInterface
      *
      * @return RegisterHandlerInterface
      */
-    public function getRegisterHandler()
+    public function getRegisterHandler(): RegisterHandlerInterface
     {
         return Injector::inst()->create(RegisterHandler::class);
     }
 
-    public function getDetails()
+    public function getDetails(): AvailableMethodDetailsInterface
     {
         return Injector::inst()->create(AvailableMethodDetailsInterface::class, $this);
     }
@@ -52,9 +52,9 @@ class Method implements MethodInterface
      *
      * @return string
      */
-    public function getThumbnail()
+    public function getThumbnail(): string
     {
-        return ModuleLoader::getModule('silverstripe/webauthn-authenticator')
+        return (string) ModuleLoader::getModule('silverstripe/webauthn-authenticator')
             ->getResource('client/dist/images/u2f.svg')
             ->getURL();
     }
@@ -65,7 +65,7 @@ class Method implements MethodInterface
      *
      * @return void
      */
-    public function applyRequirements()
+    public function applyRequirements(): void
     {
         Requirements::javascript('silverstripe/webauthn-authenticator: client/dist/js/bundle.js');
         Requirements::css('silverstripe/webauthn-authenticator: client/dist/styles/bundle.css');
