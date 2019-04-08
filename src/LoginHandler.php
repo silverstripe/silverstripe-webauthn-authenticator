@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace SilverStripe\WebAuthn;
 
@@ -6,7 +6,6 @@ use CBOR\Decoder;
 use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use GuzzleHttp\Psr7\ServerRequest;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
@@ -18,7 +17,6 @@ use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRequestOptions;
@@ -34,7 +32,7 @@ class LoginHandler implements LoginHandlerInterface
      * @param RegisteredMethod $method The RegisteredMethod instance that is being verified
      * @return array Props to be passed to a front-end component
      */
-    public function start(StoreInterface $store, RegisteredMethod $method)
+    public function start(StoreInterface $store, RegisteredMethod $method): array
     {
         return [
             'publicKey' => $this->getCredentialRequestOptions($store, $method),
@@ -50,7 +48,7 @@ class LoginHandler implements LoginHandlerInterface
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
      * @return bool
      */
-    public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod)
+    public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): bool
     {
         $options = $this->getCredentialRequestOptions($store, $registeredMethod);
         $data = json_decode($request->getBody(), true);
@@ -100,8 +98,6 @@ class LoginHandler implements LoginHandlerInterface
         } catch (\Exception $e) {
             throw $e;
         }
-
-        return false;
     }
 
     /**
@@ -111,7 +107,7 @@ class LoginHandler implements LoginHandlerInterface
      *
      * @return string
      */
-    public function getLeadInLabel()
+    public function getLeadInLabel(): string
     {
         return _t(__CLASS__ . '.LEAD_IN', 'Login using a security key device');
     }
@@ -121,7 +117,7 @@ class LoginHandler implements LoginHandlerInterface
      *
      * @return string
      */
-    public function getComponent()
+    public function getComponent(): string
     {
         return 'WebAuthnLogin';
     }

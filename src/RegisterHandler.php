@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace SilverStripe\WebAuthn;
 
@@ -7,6 +7,7 @@ use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
@@ -52,7 +53,7 @@ class RegisterHandler implements RegisterHandlerInterface
      * @return array Props to be passed to a front-end component
      * @throws Exception When there is no valid source of CSPRNG
      */
-    public function start(StoreInterface $store)
+    public function start(StoreInterface $store): array
     {
         $options = $this->getCredentialCreationOptions($store);
 
@@ -69,7 +70,7 @@ class RegisterHandler implements RegisterHandlerInterface
      * @return array
      * @throws Exception
      */
-    public function register(HTTPRequest $request, StoreInterface $store)
+    public function register(HTTPRequest $request, StoreInterface $store): array
     {
         $options = $this->getCredentialCreationOptions($store);
         $data = json_decode($request->getBody(), true);
@@ -131,7 +132,7 @@ class RegisterHandler implements RegisterHandlerInterface
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return _t(__CLASS__ . '.NAME', 'Register your security key');
     }
@@ -143,7 +144,7 @@ class RegisterHandler implements RegisterHandlerInterface
      *
      * @return string
      */
-    public function getDescription()
+    public function getDescription(): string
     {
         return _t(
             __CLASS__ . '.DESCRIPTION',
@@ -156,7 +157,7 @@ class RegisterHandler implements RegisterHandlerInterface
      *
      * @return string
      */
-    public function getSupportLink()
+    public function getSupportLink(): string
     {
         return static::config()->get('user_help_link') ?: '';
     }
@@ -166,9 +167,19 @@ class RegisterHandler implements RegisterHandlerInterface
      *
      * @return string
      */
-    public function getComponent()
+    public function getComponent(): string
     {
         return 'WebAuthnRegister';
+    }
+
+    public function isAvailable(): bool
+    {
+        return Director::is_https();
+    }
+
+    public function getUnavailableMessage(): string
+    {
+        return _t(__CLASS__ . '.REQUIRES_HTTPS', 'This method can only be used over HTTPS.');
     }
 
     protected function getRelyingPartyEntity()
