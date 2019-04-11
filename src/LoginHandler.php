@@ -91,7 +91,7 @@ class LoginHandler implements LoginHandlerInterface
                 $publicKeyCredential->getResponse(),
                 $options,
                 $request,
-                $store->getMember()->ID
+                (string) $store->getMember()->ID
             );
 
             return true;

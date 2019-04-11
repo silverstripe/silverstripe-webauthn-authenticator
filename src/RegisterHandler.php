@@ -7,7 +7,6 @@ use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
@@ -172,16 +171,6 @@ class RegisterHandler implements RegisterHandlerInterface
         return 'WebAuthnRegister';
     }
 
-    public function isAvailable(): bool
-    {
-        return Director::is_https();
-    }
-
-    public function getUnavailableMessage(): string
-    {
-        return _t(__CLASS__ . '.REQUIRES_HTTPS', 'This method can only be used over HTTPS.');
-    }
-
     protected function getRelyingPartyEntity()
     {
         return new PublicKeyCredentialRpEntity(
@@ -195,7 +184,7 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         return new PublicKeyCredentialUserEntity(
             $member->getName(),
-            $member->ID,
+            (string) $member->ID,
             $member->getName()
         );
     }
