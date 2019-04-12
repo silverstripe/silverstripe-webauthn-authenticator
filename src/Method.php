@@ -2,12 +2,12 @@
 
 namespace SilverStripe\WebAuthn;
 
+use SilverStripe\Control\Director;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
 use SilverStripe\MFA\Method\MethodInterface;
-use SilverStripe\MFA\State\AvailableMethodDetailsInterface;
 use SilverStripe\View\Requirements;
 
 class Method implements MethodInterface
@@ -42,11 +42,6 @@ class Method implements MethodInterface
         return Injector::inst()->create(RegisterHandler::class);
     }
 
-    public function getDetails(): AvailableMethodDetailsInterface
-    {
-        return Injector::inst()->create(AvailableMethodDetailsInterface::class, $this);
-    }
-
     /**
      * Return a URL to an image to be used as a thumbnail in the MFA login/registration grid for all MFA methods
      *
@@ -69,5 +64,15 @@ class Method implements MethodInterface
     {
         Requirements::javascript('silverstripe/webauthn-authenticator: client/dist/js/bundle.js');
         Requirements::css('silverstripe/webauthn-authenticator: client/dist/styles/bundle.css');
+    }
+
+    public function isAvailable(): bool
+    {
+        return Director::is_https();
+    }
+
+    public function getUnavailableMessage(): string
+    {
+        return _t(__CLASS__ . '.REQUIRES_HTTPS', 'This method can only be used over HTTPS.');
     }
 }
