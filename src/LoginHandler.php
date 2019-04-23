@@ -35,7 +35,7 @@ class LoginHandler implements LoginHandlerInterface
     public function start(StoreInterface $store, RegisteredMethod $method): array
     {
         return [
-            'publicKey' => $this->getCredentialRequestOptions($store, $method),
+            'publicKey' => $this->getCredentialRequestOptions($store, $method, true),
         ];
     }
 
@@ -47,10 +47,12 @@ class LoginHandler implements LoginHandlerInterface
      * @param StoreInterface $store
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
      * @return bool
+     * @throws \Exception
      */
     public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): bool
     {
         $options = $this->getCredentialRequestOptions($store, $registeredMethod);
+
         $data = json_decode($request->getBody(), true);
 
         // CBOR
@@ -122,26 +124,31 @@ class LoginHandler implements LoginHandlerInterface
         return 'WebAuthnLogin';
     }
 
-    protected function getCredentialRequestOptions(StoreInterface $store, RegisteredMethod $registeredMethod)
-    {
+    protected function getCredentialRequestOptions(
+        StoreInterface $store,
+        RegisteredMethod $registeredMethod,
+        $reset = false
+    ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
 
-        if (empty($state) || empty($state['challenge'])) {
-            $challenge = random_bytes(32);
-            $store->setState(['challenge' => $challenge]);
-        } else {
-            $challenge = $state['challenge'];
+        if (!$reset && !empty($state) && !empty($state['credentialOptions'])) {
+            return PublicKeyCredentialRequestOptions::createFromArray($state['credentialOptions']);
         }
 
         $data = json_decode($registeredMethod->Data, true);
         $descriptor = PublicKeyCredentialDescriptor::createFromJson($data['descriptor']);
 
-        return new PublicKeyCredentialRequestOptions(
-            $challenge,
+        $options = new PublicKeyCredentialRequestOptions(
+            random_bytes(32),
             40000,
             null,
             [$descriptor],
             PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED
         );
+
+        $state['credentialOptions'] = $options;
+        $store->setState($state);
+
+        return $options;
     }
 }
