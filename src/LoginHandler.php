@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
+use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -46,10 +47,10 @@ class LoginHandler implements LoginHandlerInterface
      * @param HTTPRequest $request
      * @param StoreInterface $store
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
-     * @return bool
+     * @return Result
      * @throws \Exception
      */
-    public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): bool
+    public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): Result
     {
         $options = $this->getCredentialRequestOptions($store, $registeredMethod);
 
@@ -96,7 +97,7 @@ class LoginHandler implements LoginHandlerInterface
                 (string) $store->getMember()->ID
             );
 
-            return true;
+            return Result::create();
         } catch (\Exception $e) {
             throw $e;
         }
