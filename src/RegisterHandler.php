@@ -11,6 +11,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
+use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -54,7 +55,7 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     public function start(StoreInterface $store): array
     {
-        $options = $this->getCredentialCreationOptions($store);
+        $options = $this->getCredentialCreationOptions($store, true);
 
         return [
             'keyData' => $options,
@@ -69,7 +70,7 @@ class RegisterHandler implements RegisterHandlerInterface
      * @return array
      * @throws Exception
      */
-    public function register(HTTPRequest $request, StoreInterface $store): array
+    public function register(HTTPRequest $request, StoreInterface $store): Result
     {
         $options = $this->getCredentialCreationOptions($store);
         $data = json_decode($request->getBody(), true);
@@ -85,7 +86,7 @@ class RegisterHandler implements RegisterHandlerInterface
         // Attestation object loader
         $attestationObjectLoader = new AttestationObjectLoader($attestationStatementSupportManager, $decoder);
 
-        $publicKeyCredentailLoader = new PublicKeyCredentialLoader($attestationObjectLoader, $decoder);
+        $publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader, $decoder);
 
         $credentialRepository = new CredentialRepository($store->getMember());
 
@@ -100,7 +101,7 @@ class RegisterHandler implements RegisterHandlerInterface
         $request = ServerRequest::fromGlobals();
 
         try {
-            $publicKeyCredential = $publicKeyCredentailLoader->load(base64_decode($data['credentials']));
+            $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
             $response = $publicKeyCredential->getResponse();
 
             if (!$response instanceof AuthenticatorAttestationResponse) {
@@ -109,19 +110,18 @@ class RegisterHandler implements RegisterHandlerInterface
 
             $authenticatorAttestationResponseValidator->check($response, $options, $request);
         } catch (\Exception $e) {
-            var_dump($e);
-            die('do something here: '.$e->getMessage());
+            return Result::create(false, 'Registration failed: '.$e->getMessage());
         }
 
         if (!$response->getAttestationObject()->getAuthData()->hasAttestedCredentialData()) {
             die('something else that might go wrong but probably wont');
         }
 
-        return [
+        return Result::create()->setContext([
             'descriptor' => $publicKeyCredential->getPublicKeyCredentialDescriptor(),
             'data' => $response->getAttestationObject()->getAuthData()->getAttestedCredentialData(),
             'counter' => null,
-        ];
+        ]);
     }
 
     /**
@@ -191,24 +191,22 @@ class RegisterHandler implements RegisterHandlerInterface
 
     /**
      * @param StoreInterface $store
+     * @param bool $reset
      * @return PublicKeyCredentialCreationOptions
      * @throws Exception
      */
-    protected function getCredentialCreationOptions(StoreInterface $store): PublicKeyCredentialCreationOptions
+    protected function getCredentialCreationOptions(StoreInterface $store, $reset = false): PublicKeyCredentialCreationOptions
     {
         $state = $store->getState();
 
-        if (empty($state) || empty($state['challenge'])) {
-            $challenge = random_bytes(32);
-            $store->setState(['challenge' => $challenge]);
-        } else {
-            $challenge = $state['challenge'];
+        if (!$reset && !empty($state) && !empty($state['credentialOptions'])) {
+            return PublicKeyCredentialCreationOptions::createFromArray($state['credentialOptions']);
         }
 
-        return new PublicKeyCredentialCreationOptions(
+        $credentialOptions = new PublicKeyCredentialCreationOptions(
             $this->getRelyingPartyEntity(),
             $this->getUserEntity($store->getMember()),
-            $challenge,
+            random_bytes(32),
             [new PublicKeyCredentialParameters('public-key', PublicKeyCredentialParameters::ALGORITHM_ES256)],
             40000,
             [],
@@ -216,5 +214,9 @@ class RegisterHandler implements RegisterHandlerInterface
             PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
             new AuthenticationExtensionsClientInputs()
         );
+
+        $store->setState(['credentialOptions' => $credentialOptions] + $state);
+
+        return $credentialOptions;
     }
 }
