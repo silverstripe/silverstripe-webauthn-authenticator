@@ -127,13 +127,11 @@ class RegisterHandler implements RegisterHandlerInterface
     /**
      * Provide a localised name for this MFA Method.
      *
-     * eg. "Authenticator app"
-     *
      * @return string
      */
     public function getName(): string
     {
-        return _t(__CLASS__ . '.NAME', 'Register your security key');
+        return _t(__CLASS__ . '.NAME', 'Security key');
     }
 
     /**
