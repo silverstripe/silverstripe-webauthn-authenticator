@@ -1,4 +1,12 @@
-# SilverStripe supported module skeleton
+# SilverStripe Webauthn Authenticator
+
+[![Build Status](https://travis-ci.com/silverstripe/silverstripe-webauthn-authenticator.svg?branch=master)](https://travis-ci.com/silverstripe/silverstripe-webauthn-authenticator)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/silverstripe-webauthn-authenticator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/silverstripe-webauthn-authenticator/?branch=master)
+[![codecov](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator)
+
+---
+
+# Readme details coming soon 
 
 A useful skeleton to more easily create modules that conform to the
 [Module Standard](https://docs.silverstripe.org/en/developer_guides/extending/modules/#module-standard).
