@@ -1,9 +1,11 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace SilverStripe\WebAuthn;
 
 use InvalidArgumentException;
 use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\Security\Member;
+use TypeError;
 use Webauthn\AttestedCredentialData;
 use Webauthn\CredentialRepository as CredentialRepositoryInterface;
 
@@ -47,14 +49,14 @@ class CredentialRepository implements CredentialRepositoryInterface
 
         $data = $this->getCredentialData();
 
-        return AttestedCredentialData::createFromJson($data['data']);
+        return AttestedCredentialData::createFromArray($data['data']);
     }
 
     public function getUserHandleFor(string $credentialId): string
     {
         $this->assertCredentialID($credentialId);
 
-        return $this->member->ID;
+        return (string) $this->member->ID;
     }
 
     public function getCounterFor(string $credentialId): int
@@ -74,13 +76,17 @@ class CredentialRepository implements CredentialRepositoryInterface
         $this->registeredMethod->write();
     }
 
-    protected function getCredentialData()
+    protected function getCredentialData(): array
     {
         if (!$this->registeredMethod) {
             return [];
         }
 
-        return json_decode($this->registeredMethod->Data, true) ?: [];
+        try {
+            return json_decode($this->registeredMethod->Data, true);
+        } catch (TypeError $error) {
+            return [];
+        }
     }
 
     /**

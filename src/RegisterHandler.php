@@ -110,7 +110,7 @@ class RegisterHandler implements RegisterHandlerInterface
 
             $authenticatorAttestationResponseValidator->check($response, $options, $request);
         } catch (\Exception $e) {
-            return Result::create(false, 'Registration failed: '.$e->getMessage());
+            return Result::create(false, 'Registration failed: ' . $e->getMessage());
         }
 
         if (!$response->getAttestationObject()->getAuthData()->hasAttestedCredentialData()) {
@@ -193,8 +193,10 @@ class RegisterHandler implements RegisterHandlerInterface
      * @return PublicKeyCredentialCreationOptions
      * @throws Exception
      */
-    protected function getCredentialCreationOptions(StoreInterface $store, $reset = false): PublicKeyCredentialCreationOptions
-    {
+    protected function getCredentialCreationOptions(
+        StoreInterface $store,
+        bool $reset = false
+    ): PublicKeyCredentialCreationOptions {
         $state = $store->getState();
 
         if (!$reset && !empty($state) && !empty($state['credentialOptions'])) {
