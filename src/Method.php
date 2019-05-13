@@ -5,7 +5,7 @@ namespace SilverStripe\WebAuthn;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Manifest\ModuleLoader;
-use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
+use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
 use SilverStripe\MFA\Method\MethodInterface;
 use SilverStripe\View\Requirements;
@@ -23,13 +23,13 @@ class Method implements MethodInterface
     }
 
     /**
-     * Return the LoginHandler that is used to start and verify login attempts with this method
+     * Return the VerifyLHandler that is used to start and verify login attempts with this method
      *
-     * @return LoginHandlerInterface
+     * @return VerifyHandlerInterface
      */
-    public function getLoginHandler(): LoginHandlerInterface
+    public function getVerifyHandler(): VerifyHandlerInterface
     {
-        return Injector::inst()->create(LoginHandler::class);
+        return Injector::inst()->create(VerifyHandler::class);
     }
 
     /**
@@ -43,7 +43,7 @@ class Method implements MethodInterface
     }
 
     /**
-     * Return a URL to an image to be used as a thumbnail in the MFA login/registration grid for all MFA methods
+     * Return a URL to an image to be used as a thumbnail in the MFA verification/registration grid for all MFA methods
      *
      * @return string
      */

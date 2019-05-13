@@ -1,10 +1,10 @@
 import Injector from 'lib/Injector';
 import WebAuthnRegister from 'components/WebAuthn/Register';
-import WebAuthnLogin from 'components/WebAuthn/Login';
+import WebAuthnVerify from 'components/WebAuthn/Verify';
 
 export default () => {
   Injector.component.registerMany({
     WebAuthnRegister,
-    WebAuthnLogin,
+    WebAuthnVerify,
   });
 };
