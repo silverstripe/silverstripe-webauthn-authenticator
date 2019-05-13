@@ -7,7 +7,7 @@ use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use GuzzleHttp\Psr7\ServerRequest;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\MFA\Method\Handler\LoginHandlerInterface;
+use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
@@ -23,7 +23,7 @@ use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
-class LoginHandler implements LoginHandlerInterface
+class VerifyHandler implements VerifyHandlerInterface
 {
     /**
      * Stores any data required to handle a login process with a method, and returns relevant state to be applied to the
@@ -122,7 +122,7 @@ class LoginHandler implements LoginHandlerInterface
      */
     public function getComponent(): string
     {
-        return 'WebAuthnLogin';
+        return 'WebAuthnVerify';
     }
 
     protected function getCredentialRequestOptions(

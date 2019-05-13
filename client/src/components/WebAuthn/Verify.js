@@ -3,14 +3,15 @@
 import React, { Component } from 'react';
 import { base64ToByteArray, byteArrayToBase64 } from 'lib/convert';
 
-class Login extends Component {
+class Verify extends Component {
   constructor(props) {
     super(props);
 
     this.handleStartAuth = this.handleStartAuth.bind(this);
   }
+
   initAuth() {
-    const { publicKey, onCompleteLogin } = this.props;
+    const { publicKey, onCompleteVerification } = this.props;
 
     const parsed = {
       ...publicKey,
@@ -23,7 +24,7 @@ class Login extends Component {
 
     navigator.credentials.get({ publicKey: parsed })
       .then(response => {
-        onCompleteLogin({
+        onCompleteVerification({
           credentials: btoa(JSON.stringify({
             id: response.id,
             type: response.type,
@@ -60,7 +61,7 @@ class Login extends Component {
     return (
       <p>
         {i18n._t(
-          'MFAWebAuthnLogin.DESCRIPTION',
+          'MFAWebAuthnVerify.DESCRIPTION',
           'Use your security key'
         )}
       </p>
@@ -72,16 +73,16 @@ class Login extends Component {
     const { moreOptionsControl } = this.props;
 
     return (
-      <form className="mfa-login-web-authn__container">
-        <div className="mfa-login-web-authn__content">
+      <form className="mfa-verify-web-authn__container">
+        <div className="mfa-verify-web-authn__content">
           {this.renderDescription()}
         </div>
         <button onClick={this.handleStartAuth}>Do it</button>
         {moreOptionsControl}
-        <div className="mfa-login-web-authn__icon" />
+        <div className="mfa-verify-web-authn__icon" />
       </form>
     );
   }
 }
 
-export default Login;
+export default Verify;
