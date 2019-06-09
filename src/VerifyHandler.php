@@ -80,7 +80,7 @@ class VerifyHandler implements VerifyHandlerInterface
         );
 
         // Create a PSR-7 request
-        $request = ServerRequest::fromGlobals();
+        $psrRequest = ServerRequest::fromGlobals();
 
         try {
             $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
@@ -94,7 +94,7 @@ class VerifyHandler implements VerifyHandlerInterface
                 $publicKeyCredential->getRawId(),
                 $publicKeyCredential->getResponse(),
                 $options,
-                $request,
+                $psrRequest,
                 (string) $store->getMember()->ID
             );
 
@@ -138,7 +138,7 @@ class VerifyHandler implements VerifyHandlerInterface
         }
 
         $data = json_decode($registeredMethod->Data, true);
-        $descriptor = PublicKeyCredentialDescriptor::createFromJson($data['descriptor']);
+        $descriptor = PublicKeyCredentialDescriptor::createFromArray($data['descriptor']);
 
         $options = new PublicKeyCredentialRequestOptions(
             random_bytes(32),
