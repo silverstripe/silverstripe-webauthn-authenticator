@@ -67,7 +67,7 @@ class RegisterHandler implements RegisterHandlerInterface
      *
      * @param HTTPRequest $request
      * @param StoreInterface $store
-     * @return array
+     * @return Result
      * @throws Exception
      */
     public function register(HTTPRequest $request, StoreInterface $store): Result
@@ -109,7 +109,7 @@ class RegisterHandler implements RegisterHandlerInterface
             }
 
             $authenticatorAttestationResponseValidator->check($response, $options, $request);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
         }
 
@@ -169,7 +169,7 @@ class RegisterHandler implements RegisterHandlerInterface
         return 'WebAuthnRegister';
     }
 
-    protected function getRelyingPartyEntity()
+    protected function getRelyingPartyEntity(): PublicKeyCredentialRpEntity
     {
         return new PublicKeyCredentialRpEntity(
             (string) SiteConfig::current_site_config()->Title,
@@ -178,7 +178,7 @@ class RegisterHandler implements RegisterHandlerInterface
         );
     }
 
-    protected function getUserEntity(Member $member)
+    protected function getUserEntity(Member $member): PublicKeyCredentialUserEntity
     {
         return new PublicKeyCredentialUserEntity(
             $member->getName(),

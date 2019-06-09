@@ -5,6 +5,7 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
+use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
@@ -47,8 +48,8 @@ class VerifyHandler implements VerifyHandlerInterface
      * @param HTTPRequest $request
      * @param StoreInterface $store
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
-     * @return bool
-     * @throws \Exception
+     * @return Result
+     * @throws Exception
      */
     public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): Result
     {
@@ -86,7 +87,7 @@ class VerifyHandler implements VerifyHandlerInterface
             $response = $publicKeyCredential->getResponse();
 
             if (!$response instanceof AuthenticatorAssertionResponse) {
-                throw new \Exception('why even have this?');
+                throw new Exception('why even have this?');
             }
 
             $authenticatorAssertionResponseValidator->check(
@@ -98,7 +99,7 @@ class VerifyHandler implements VerifyHandlerInterface
             );
 
             return Result::create();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
