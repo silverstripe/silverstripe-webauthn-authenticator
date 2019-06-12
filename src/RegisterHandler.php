@@ -7,6 +7,7 @@ use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
@@ -171,9 +172,13 @@ class RegisterHandler implements RegisterHandlerInterface
 
     protected function getRelyingPartyEntity(): PublicKeyCredentialRpEntity
     {
+        // Relying party entity ONLY allows domains or subdomains. Remove ports or anything else that isn't already.
+        // See https://github.com/web-auth/webauthn-framework/blob/v1.2.2/doc/webauthn/PublicKeyCredentialCreation.md#relying-party-entity
+        $host = parse_url(Director::host(), PHP_URL_HOST);
+
         return new PublicKeyCredentialRpEntity(
             (string) SiteConfig::current_site_config()->Title,
-            /*Environment::getEnv('SS_BASE_URL') ?:*/ null,
+            $host,
             static::config()->get('application_logo')
         );
     }
