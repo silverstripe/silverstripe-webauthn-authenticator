@@ -13,7 +13,7 @@ export default function webauthnAvailableReducer(state = {}) {
   // Only provide a "mfaRegister" state override if unavailable
   const webAuthnAvailable = isAvailable ? {} : {
     isAvailable,
-    unavailableMessage: window.i18n._t(
+    unavailableMessage: window.ss.i18n._t(
       'WebAuthnReducer.UNSUPPORTED_BROWSER',
       'Security keys are not supported by this browser'
     ),
