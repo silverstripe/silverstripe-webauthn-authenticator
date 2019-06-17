@@ -1,0 +1,11 @@
+{
+    "MFAWebAuthnRegister.BACK": "Back",
+    "MFAWebAuthnRegister.DESCRIPTION": "Contact your administrator if you require a security key. ",
+    "MFAWebAuthnRegister.FAILURE": "Something went wrong. Please re-insert your key and try again",
+    "MFAWebAuthnRegister.HELP": "How to use security keys",
+    "MFAWebAuthnRegister.INSTRUCTION": "Insert security key and press {button}",
+    "MFAWebAuthnRegister.NEXT": "Next",
+    "MFAWebAuthnRegister.REGISTER": "Register key",
+    "MFAWebAuthnRegister.SUCCESS": "Registered",
+    "MFAWebAuthnRegister.WAITING": "Waiting"
+}
