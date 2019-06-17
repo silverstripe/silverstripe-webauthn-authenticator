@@ -5,6 +5,7 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
+use Cose\Algorithms;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use SilverStripe\Control\Director;
@@ -180,6 +181,9 @@ class RegisterHandler implements RegisterHandlerInterface
         return 'WebAuthnRegister';
     }
 
+    /**
+     * @return PublicKeyCredentialRpEntity
+     */
     protected function getRelyingPartyEntity(): PublicKeyCredentialRpEntity
     {
         // Relying party entity ONLY allows domains or subdomains. Remove ports or anything else that isn't already.
@@ -193,6 +197,10 @@ class RegisterHandler implements RegisterHandlerInterface
         );
     }
 
+    /**
+     * @param Member $member
+     * @return PublicKeyCredentialUserEntity
+     */
     protected function getUserEntity(Member $member): PublicKeyCredentialUserEntity
     {
         return new PublicKeyCredentialUserEntity(
@@ -222,7 +230,7 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getRelyingPartyEntity(),
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
-            [new PublicKeyCredentialParameters('public-key', PublicKeyCredentialParameters::ALGORITHM_ES256)],
+            [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
             40000,
             [],
             $this->getAuthenticatorSelectionCriteria(),
