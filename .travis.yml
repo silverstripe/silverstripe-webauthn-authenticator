@@ -33,8 +33,9 @@ script:
   - if [[ $PHPCS_TEST ]]; then vendor/bin/phpcs src/ tests/; fi
   #- if [[ $NPM_TEST ]]; then git diff-files --quiet -w --relative=client; fi
   #- if [[ $NPM_TEST ]]; then git diff --name-status --relative=client; fi
-  - if [[ $NPM_TEST ]]; then yarn run test; fi
+  - if [[ $NPM_TEST ]]; then yarn run coverage; fi
   - if [[ $NPM_TEST ]]; then yarn run lint; fi
 
 after_success:
   - if [[ $PHPUNIT_COVERAGE_TEST ]]; then bash <(curl -s https://codecov.io/bash) -f coverage.xml; fi
+  - if [[ $NPM_TEST ]]; then bash <(curl -s https://codecov.io/bash) -F js; fi
