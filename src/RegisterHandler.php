@@ -47,6 +47,16 @@ class RegisterHandler implements RegisterHandlerInterface
     private static $user_help_link;
 
     /**
+     * The default attachment mode to use for Authentication Selection Criteria.
+     *
+     * See {@link getAuthenticatorSelectionCriteria()} for more information.
+     *
+     * @config
+     * @var string
+     */
+    private static $authenticator_attachment = AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
+
+    /**
      * Stores any data required to handle a registration process with a method, and returns relevant state to be applied
      * to the front-end application managing the process.
      *
@@ -215,7 +225,7 @@ class RegisterHandler implements RegisterHandlerInterface
             [new PublicKeyCredentialParameters('public-key', PublicKeyCredentialParameters::ALGORITHM_ES256)],
             40000,
             [],
-            new AuthenticatorSelectionCriteria(),
+            $this->getAuthenticatorSelectionCriteria(),
             PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
             new AuthenticationExtensionsClientInputs()
         );
@@ -223,5 +233,23 @@ class RegisterHandler implements RegisterHandlerInterface
         $store->setState(['credentialOptions' => $credentialOptions] + $state);
 
         return $credentialOptions;
+    }
+
+    /**
+     * Returns an "Authenticator Selection Criteria" object which is intended to select the appropriate authenticators
+     * to participate in the creation operation.
+     *
+     * The default is to allow only "cross platform" authenticators, e.g. disabling "single platform" authenticators
+     * such as touch ID.
+     *
+     * For more information: https://github.com/web-auth/webauthn-framework/blob/v1.2/doc/webauthn/PublicKeyCredentialCreation.md#authenticator-selection-criteria
+     *
+     * @return AuthenticatorSelectionCriteria
+     */
+    protected function getAuthenticatorSelectionCriteria(): AuthenticatorSelectionCriteria
+    {
+        return new AuthenticatorSelectionCriteria(
+            (string) $this->config()->get('authenticator_attachment')
+        );
     }
 }
