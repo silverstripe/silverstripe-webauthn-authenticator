@@ -5,6 +5,7 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
+use Cose\Algorithms;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use SilverStripe\Control\Director;
@@ -45,6 +46,16 @@ class RegisterHandler implements RegisterHandlerInterface
      * @var string
      */
     private static $user_help_link;
+
+    /**
+     * The default attachment mode to use for Authentication Selection Criteria.
+     *
+     * See {@link getAuthenticatorSelectionCriteria()} for more information.
+     *
+     * @config
+     * @var string
+     */
+    private static $authenticator_attachment = AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
 
     /**
      * Stores any data required to handle a registration process with a method, and returns relevant state to be applied
@@ -170,6 +181,9 @@ class RegisterHandler implements RegisterHandlerInterface
         return 'WebAuthnRegister';
     }
 
+    /**
+     * @return PublicKeyCredentialRpEntity
+     */
     protected function getRelyingPartyEntity(): PublicKeyCredentialRpEntity
     {
         // Relying party entity ONLY allows domains or subdomains. Remove ports or anything else that isn't already.
@@ -183,6 +197,10 @@ class RegisterHandler implements RegisterHandlerInterface
         );
     }
 
+    /**
+     * @param Member $member
+     * @return PublicKeyCredentialUserEntity
+     */
     protected function getUserEntity(Member $member): PublicKeyCredentialUserEntity
     {
         return new PublicKeyCredentialUserEntity(
@@ -212,10 +230,10 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getRelyingPartyEntity(),
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
-            [new PublicKeyCredentialParameters('public-key', PublicKeyCredentialParameters::ALGORITHM_ES256)],
+            [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
             40000,
             [],
-            new AuthenticatorSelectionCriteria(),
+            $this->getAuthenticatorSelectionCriteria(),
             PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
             new AuthenticationExtensionsClientInputs()
         );
@@ -223,5 +241,23 @@ class RegisterHandler implements RegisterHandlerInterface
         $store->setState(['credentialOptions' => $credentialOptions] + $state);
 
         return $credentialOptions;
+    }
+
+    /**
+     * Returns an "Authenticator Selection Criteria" object which is intended to select the appropriate authenticators
+     * to participate in the creation operation.
+     *
+     * The default is to allow only "cross platform" authenticators, e.g. disabling "single platform" authenticators
+     * such as touch ID.
+     *
+     * For more information: https://github.com/web-auth/webauthn-framework/blob/v1.2/doc/webauthn/PublicKeyCredentialCreation.md#authenticator-selection-criteria
+     *
+     * @return AuthenticatorSelectionCriteria
+     */
+    protected function getAuthenticatorSelectionCriteria(): AuthenticatorSelectionCriteria
+    {
+        return new AuthenticatorSelectionCriteria(
+            (string) $this->config()->get('authenticator_attachment')
+        );
     }
 }

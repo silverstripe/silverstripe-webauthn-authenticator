@@ -6,6 +6,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\MFA\Store\SessionStore;
 use SilverStripe\Security\Member;
 use SilverStripe\WebAuthn\RegisterHandler;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 
 class RegisterHandlerTest extends SapphireTest
@@ -38,6 +39,12 @@ class RegisterHandlerTest extends SapphireTest
         $this->member = Member::get()->byID($memberID);
 
         $this->originalServer = $_SERVER;
+
+        // Set default configuration settings
+        RegisterHandler::config()->set(
+            'authenticator_attachment',
+            AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM
+        );
     }
 
     protected function tearDown()
@@ -58,7 +65,6 @@ class RegisterHandlerTest extends SapphireTest
 
         $store = new SessionStore($this->member);
         $result = $this->handler->start($store);
-
         $this->assertArrayHasKey('keyData', $result);
 
         /** @var PublicKeyCredentialCreationOptions $options */
@@ -89,5 +95,22 @@ class RegisterHandlerTest extends SapphireTest
             'subdomain with port and subfolder' => ['https://my.example.com:8080/mysite', 'my.example.com'],
             'credentials with domain and trailing slash' => ['http://foo:bar@example.com/', 'example.com'],
         ];
+    }
+
+    public function testAuthenticatorSelectionCriteriaRequiresCrossPlatformAttachmentByDefault()
+    {
+        $store = new SessionStore($this->member);
+        $result = $this->handler->start($store);
+        $this->assertArrayHasKey('keyData', $result);
+
+        /** @var PublicKeyCredentialCreationOptions $options */
+        $options = $result['keyData'];
+        $this->assertInstanceOf(PublicKeyCredentialCreationOptions::class, $options);
+
+        $authenticatorSelection = $options->getAuthenticatorSelection();
+        $this->assertSame(
+            AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM,
+            $authenticatorSelection->getAuthenticatorAttachment()
+        );
     }
 }
