@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { base64ToByteArray, byteArrayToBase64 } from 'lib/convert';
+import { performRegistration } from 'lib/auth';
 
 import CircleTick from '../Icons/CircleTick';
 import CircleWarning from '../Icons/CircleWarning';
@@ -10,7 +10,7 @@ import LoadingIndicator from '../LoadingIndicator';
 
 const fallbacks = require('../../../lang/src/en.json');
 
-const VIEWS = {
+export const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
   READY: 'READY', // Waiting for the user to start the process
   REGISTERING: 'REGISTERING', // Waiting for the security key / server
@@ -19,8 +19,8 @@ const VIEWS = {
 };
 
 /**
- * This component provides the user interface for registering backup codes with a user. This process
- * only involves showing the user the backup codes. User input is not required to set up the codes.
+ * This component provides the UI for registering a security key with a user. This process involves
+ * triggering a WebAuthn registration request, and sending the registration back to SilverStripe.
  */
 class Register extends Component {
   constructor(props) {
@@ -51,51 +51,6 @@ class Register extends Component {
   }
 
   /**
-   * Start the WebAuthn registration process
-   *
-   * @returns {Promise<any>} Resolves if registration succeeds, rejects if not
-   */
-  initAuth() {
-    const { keyData } = this.props;
-
-    const user = {
-      ...keyData.user,
-      id: base64ToByteArray(keyData.user.id),
-    };
-
-    const parsedKey = {
-      ...keyData,
-      user,
-      challenge: base64ToByteArray(keyData.challenge),
-    };
-
-    const { navigator } = window;
-
-    return new Promise((resolve, reject) => {
-      navigator.credentials.create({ publicKey: parsedKey })
-        .then(response => {
-          this.setState({
-            registrationData: {
-              credentials: btoa(JSON.stringify({
-                id: response.id,
-                type: response.type,
-                rawId: byteArrayToBase64(response.rawId),
-                response: {
-                  clientDataJSON: byteArrayToBase64(response.response.clientDataJSON),
-                  attestationObject: byteArrayToBase64(response.response.attestationObject),
-                },
-              })),
-            },
-          });
-
-          resolve();
-        }).catch(error => {
-          reject(error.message);
-      });
-    });
-  }
-
-  /**
    * Send the user back to the "select method" UI
    */
   handleBack() {
@@ -111,6 +66,7 @@ class Register extends Component {
     // Something went wrong here...
     if (registrationData === null) {
       this.setState({ view: VIEWS.FAILURE });
+      return;
     }
 
     this.props.onCompleteRegistration(registrationData);
@@ -121,8 +77,9 @@ class Register extends Component {
    */
   handleStartRegistration() {
     this.setState({ view: VIEWS.REGISTERING });
-    this.initAuth()
-      .then(() => this.setState({ view: VIEWS.SUCCESS }))
+
+    performRegistration(this.props.keyData)
+      .then(registrationData => this.setState({ view: VIEWS.SUCCESS, registrationData }))
       .catch(() => this.setState({ view: VIEWS.FAILURE }));
   }
 
@@ -233,37 +190,78 @@ class Register extends Component {
    * @return {HTMLElement}
    */
   renderActions() {
+    const { ss: { i18n } } = window;
     const { view } = this.state;
     let actions = [];
 
     switch (view) {
       case VIEWS.FAILURE:
         actions = [
-          { action: this.handleStartRegistration, name: 'Retry' },
-          { action: this.handleBack, name: 'Back' },
+          {
+            action: this.handleStartRegistration,
+            name: i18n._t('MFAWebAuthnRegister.RETRY', fallbacks['MFAWebAuthnRegister.RETRY'])
+          },
+          {
+            action: this.handleBack,
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK'])
+          },
         ];
         break;
       case VIEWS.READY:
         actions = [
-          { action: this.handleStartRegistration, name: 'Register key' },
-          { action: this.handleBack, name: 'Back' },
+          {
+            action: this.handleStartRegistration,
+            name: i18n._t('MFAWebAuthnRegister.REGISTER', fallbacks['MFAWebAuthnRegister.REGISTER'])
+          },
+          {
+            action: this.handleBack,
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK'])
+          },
         ];
         break;
       case VIEWS.REGISTERING:
         actions = [
-          { action: this.handleStartRegistration, name: 'Registering', disabled: true },
-          { action: this.handleBack, name: 'Back', disabled: true },
+          {
+            action: this.handleStartRegistration,
+            name: i18n._t(
+              'MFAWebAuthnRegister.REGISTERING',
+              fallbacks['MFAWebAuthnRegister.REGISTERING']
+            ),
+            disabled: true
+          },
+          {
+            action: this.handleBack,
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
+            disabled: true
+          },
         ];
         break;
       case VIEWS.LOADING:
       default:
         actions = [
-          { action: this.handleStartRegistration, name: 'Registering', disabled: true },
-          { action: this.handleBack, name: 'Back', disabled: false },
+          {
+            action: this.handleStartRegistration,
+            name: i18n._t(
+              'MFAWebAuthnRegister.REGISTERING',
+              fallbacks['MFAWebAuthnRegister.REGISTERING']
+            ),
+            disabled: true,
+          },
+          {
+            action: this.handleBack,
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
+          },
         ];
         break;
       case VIEWS.SUCCESS:
-        actions = [{ action: this.handleNext, name: 'Next' }];
+        actions = [
+          {
+            action: this.handleNext,
+            name: i18n._t(
+              'MFAWebAuthnRegister.COMPLETEREGISTRATION',
+              fallbacks['MFAWebAuthnRegister.COMPLETEREGISTRATION']
+            ),
+          }];
         break;
     }
 
