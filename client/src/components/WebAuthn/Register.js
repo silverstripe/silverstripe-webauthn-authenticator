@@ -273,7 +273,7 @@ class Register extends Component {
             return (
               <button
                 key={action.name}
-                className={firstAction ? 'btn btn-primary' : 'btn btn-link'}
+                className={firstAction ? 'btn btn-primary' : 'btn btn-secondary'}
                 disabled={action.disabled || false}
                 onClick={action.action}
                 type="button"
