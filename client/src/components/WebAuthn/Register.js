@@ -10,12 +10,12 @@ import LoadingIndicator from '../LoadingIndicator';
 
 const fallbacks = require('../../../lang/src/en.json');
 
-export const VIEWS = {
+const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
   READY: 'READY', // Waiting for the user to start the process
-  REGISTERING: 'REGISTERING', // Waiting for the security key / server
-  FAILURE: 'FAILURE', // Timeout or other error from registration
-  SUCCESS: 'SUCCESS', // Successful registration
+  PROMPTING: 'PROMPTING', // Waiting for the security key / server
+  FAILURE: 'FAILURE', // Timeout or other error from prompting
+  SUCCESS: 'SUCCESS', // Successful prompting, ready to proceed
 };
 
 /**
@@ -36,17 +36,49 @@ class Register extends Component {
     this.handleStartRegistration = this.handleStartRegistration.bind(this);
   }
 
-  /**
-   * keyData may not be passed through on initial render, and we can't start without it.
-   *
-   * @todo Re-evaluate whether this code is required.
-   */
-  componentWillReceiveProps() {
-    const { keyData } = this.props;
-    const { view } = this.state;
+/**
+ * We rely on a prop called `keyData` being present, however it may not be set upon the first
+ * render of the component. We can check and wait for it via state.
+ *
+ * React 16 deprecates `componentWillReceiveProps` replacing it with `getDerivedStateFromProps`
+ * for setting state in a functional manner. We have chosen to use {@see componentDidUpdate} over
+ * `componentWillReceiveProps` in this component in order to provide the same functionality across
+ * different (supported) build versions.
+ * By having one delegate to the other we still save in maintenance costs.
+ *
+ * @param {Object} newProps incoming props for this component
+ * @param {Object} currentState current stated of this component
+ */
+  static getDerivedStateFromProps(newProps, currentState) {
+    if (currentState.view === VIEWS.LOADING && newProps.keyData) {
+      return { view: VIEWS.READY };
+    }
+    return null;
+  }
 
-    if (view === VIEWS.LOADING && keyData) {
-      this.setState({ view: VIEWS.READY });
+  /**
+   * React docs (as at React 16) imply that one should try to avoid setting state in this method...
+   * however if one is to do this, then it must be wrapped in a conditional in order to avoid
+   * an infinite loop. This method has been chosen insead of `componentWillReceieveProps` which
+   * is arguably the correct way to approach this, but it is deprecated in React 16 - we need
+   * this component to function in both React 16 and React 15 (used by the CMS still @ 4.4.1).
+   *
+   * Quote from https://reactjs.org/docs/react-component.html#componentdidupdate :
+   *
+   * > You **may call `setState()` immediately** in componentDidUpdate() but note that
+   * > **it must be wrapped in a condition** like in the example above, or you’ll cause an
+   * > infinite loop. It would also cause an extra re-rendering which, while not visible to the
+   * > user, can affect the component performance. If you’re trying to “mirror” some state to a
+   * > prop coming from above, consider using the prop directly instead.
+   * > [Read more about why copying props into state causes bugs.][1]
+   * >
+   * > [1]: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html
+   */
+  componentDidUpdate() {
+    const stateChange = Register.getDerivedStateFromProps(this.props, this.state);
+    if (stateChange) {
+      /* eslint-disable-next-line react/no-did-update-set-state */
+      this.setState(stateChange);
     }
   }
 
@@ -76,7 +108,7 @@ class Register extends Component {
    * Trigger the WebAuthn registration handler, which will present a prompt in some browsers.
    */
   handleStartRegistration() {
-    this.setState({ view: VIEWS.REGISTERING });
+    this.setState({ view: VIEWS.PROMPTING });
 
     performRegistration(this.props.keyData)
       .then(registrationData => this.setState({ view: VIEWS.SUCCESS, registrationData }))
@@ -134,7 +166,7 @@ class Register extends Component {
     switch (this.state.view) {
       case VIEWS.READY:
         return (<div className="mfa-registration-container__status status-message--empty" />);
-      case VIEWS.REGISTERING:
+      case VIEWS.PROMPTING:
       case VIEWS.LOADING:
       default:
         return (
@@ -219,7 +251,7 @@ class Register extends Component {
           },
         ];
         break;
-      case VIEWS.REGISTERING:
+      case VIEWS.PROMPTING:
         actions = [
           {
             action: this.handleStartRegistration,

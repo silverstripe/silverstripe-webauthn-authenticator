@@ -42,3 +42,36 @@ export const performRegistration = (keyData) => new Promise((resolve, reject) =>
       reject(error.message);
     });
 });
+
+export const performVerification = (publicKey) => new Promise((resolve, reject) => {
+  const parsed = {
+    ...publicKey,
+    challenge: base64ToByteArray(publicKey.challenge),
+    allowCredentials: publicKey.allowCredentials.map(data => ({
+      ...data,
+      id: base64ToByteArray(data.id),
+    })),
+  };
+
+  navigator.credentials.get({ publicKey: parsed })
+    .then(response => {
+      resolve({
+        credentials: btoa(JSON.stringify({
+          id: response.id,
+          type: response.type,
+          rawId: byteArrayToBase64(response.rawId),
+          response: {
+            clientDataJSON: byteArrayToBase64(response.response.clientDataJSON),
+            authenticatorData: byteArrayToBase64(response.response.authenticatorData),
+            signature: byteArrayToBase64(response.response.signature),
+            userHandle: response.response.userHandle
+              ? byteArrayToBase64(response.response.userHandle)
+              : null,
+          },
+        })),
+      });
+    })
+    .catch(error => {
+      reject(error.message);
+    });
+});

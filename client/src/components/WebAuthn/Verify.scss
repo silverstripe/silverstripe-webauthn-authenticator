@@ -1,0 +1,52 @@
+$color-status-icon: rgba(0,113,196,1); // $color-blue from mfa module
+
+$padding-thumbnail: 20px;
+$sizing-thumbnail: 260px;
+$spacing-status-message: 1em;
+
+$grid-column-content: 1;
+$grid-column-thumbnail: 2;
+
+$grid-row-description: 1;
+$grid-row-status: 2;
+$grid-row-actions: 3;
+$grid-row-thumbnail: 1 / span 2;
+
+.mfa-verification-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: max-content auto min-content;
+}
+
+.mfa-verification-container__description {
+  grid-column: $grid-column-content;
+  grid-row: $grid-row-description;
+}
+
+.mfa-verification-container__status {
+  align-items: center;
+  display: flex;
+  grid-column: $grid-column-content;
+  grid-row: $grid-row-status;
+}
+
+.status-message__icon {
+  color: $color-status-icon;
+}
+
+.status-message__description {
+  margin-left: $spacing-status-message;
+}
+
+.mfa-verification-container__thumbnail {
+  grid-column: $grid-column-thumbnail;
+  grid-row: $grid-row-thumbnail;
+  height: $sizing-thumbnail;
+  padding: $padding-thumbnail;
+  width: $sizing-thumbnail;
+}
+
+.mfa-verification-container__actions {
+  grid-column: $grid-column-content;
+  grid-row: $grid-row-actions;
+}

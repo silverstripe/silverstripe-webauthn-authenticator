@@ -9,5 +9,13 @@
     "MFAWebAuthnRegister.REGISTERING": "Registering",
     "MFAWebAuthnRegister.RETRY": "Retry",
     "MFAWebAuthnRegister.SUCCESS": "Key verified",
-    "MFAWebAuthnRegister.WAITING": "Waiting"
+    "MFAWebAuthnRegister.WAITING": "Waiting",
+
+    "MFAWebAuthnVerify.DESCRIPTION": "Use your secuirty key to verify your identity",
+    "MFAWebAuthnVerify.FAILURE": "Something went wrong. Please re-insert your key and try again",
+    "MFAWebAuthnVerify.HELP": "How to use security keys",
+    "MFAWebAuthnVerify.INSTRUCTION": "Insert security key and press {button}",
+    "MFAWebAuthnVerify.RETRY": "Retry",
+    "MFAWebAuthnVerify.VERIFY": "Verify key",
+    "MFAWebAuthnVerify.WAITING": "Waiting"
 }
