@@ -113,7 +113,7 @@ class VerifyHandler implements VerifyHandlerInterface
      */
     public function getLeadInLabel(): string
     {
-        return _t(__CLASS__ . '.LEAD_IN', 'Login using a security key device');
+        return _t(__CLASS__ . '.LEAD_IN', 'Verify with security key');
     }
 
     /**
