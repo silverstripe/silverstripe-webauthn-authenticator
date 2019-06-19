@@ -1,17 +1,21 @@
 @import '../../styles/vars';
 
-.mfa-registration-container {
+.mfa-verification-container {
   display: grid;
   grid-template-columns: auto auto;
   grid-template-rows: max-content auto min-content;
 }
 
-.mfa-registration-container__description {
+.mfa-verification-container__description {
   grid-column: $grid-column-content;
   grid-row: $grid-row-description;
+
+  a {
+    margin: auto 0.24em;
+  }
 }
 
-.mfa-registration-container__status {
+.mfa-verification-container__status {
   align-items: center;
   display: flex;
   grid-column: $grid-column-content;
@@ -26,15 +30,7 @@
   margin-left: $spacing-status-message;
 }
 
-.status-message--error {
-  color: $color-status-bad;
-
-  .status-message__icon {
-    color: $color-status-bad;
-  }
-}
-
-.mfa-registration-container__thumbnail {
+.mfa-verification-container__thumbnail {
   grid-column: $grid-column-thumbnail;
   grid-row: $grid-row-thumbnail;
   height: $sizing-thumbnail;
@@ -42,7 +38,7 @@
   width: $sizing-thumbnail;
 }
 
-.mfa-registration-container__actions {
+.mfa-verification-container__actions {
   grid-column: $grid-column-content;
   grid-row: $grid-row-actions;
 }
