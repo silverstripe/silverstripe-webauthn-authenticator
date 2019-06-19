@@ -1,7 +1,9 @@
 /* global window */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { base64ToByteArray, byteArrayToBase64 } from 'lib/convert';
+import publicKeyType from 'types/publicKey';
 
 class Verify extends Component {
   constructor(props) {
@@ -84,5 +86,11 @@ class Verify extends Component {
     );
   }
 }
+
+Verify.propTypes = {
+  publicKey: publicKeyType,
+  onCompleteVerification: PropTypes.func,
+  moreOptionsControl: PropTypes.func,
+};
 
 export default Verify;
