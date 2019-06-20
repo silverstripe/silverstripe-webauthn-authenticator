@@ -8,6 +8,7 @@ use CBOR\Tag\TagObjectManager;
 use Cose\Algorithms;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use Psr\Log\LoggerInterface;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
@@ -56,6 +57,33 @@ class RegisterHandler implements RegisterHandlerInterface
      * @var string
      */
     private static $authenticator_attachment = AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
+
+    /**
+     * Dependency injection configuration
+     *
+     * @config
+     * @var array
+     */
+    private static $dependencies = [
+        'Logger' => LoggerInterface::class . '.mfa',
+    ];
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger = null;
+
+    /**
+     * Sets the {@see $logger} member variable
+     *
+     * @param LoggerInterface|null $logger
+     * @return self
+     */
+    public function setLogger(?LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+        return $this;
+    }
 
     /**
      * Stores any data required to handle a registration process with a method, and returns relevant state to be applied
@@ -117,16 +145,17 @@ class RegisterHandler implements RegisterHandlerInterface
             $response = $publicKeyCredential->getResponse();
 
             if (!$response instanceof AuthenticatorAttestationResponse) {
-                die('why even have this?');
+                throw new ResponseTypeException('Unexpected response type found');
+            }
+
+            if (!$response->getAttestationObject()->getAuthData()->hasAttestedCredentialData()) {
+                throw new ResponseDataException('Incomplete data, required information missing');
             }
 
             $authenticatorAttestationResponseValidator->check($response, $options, $request);
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
-        }
-
-        if (!$response->getAttestationObject()->getAuthData()->hasAttestedCredentialData()) {
-            die('something else that might go wrong but probably wont');
         }
 
         return Result::create()->setContext([
