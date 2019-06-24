@@ -7,6 +7,7 @@ use CBOR\OtherObject\OtherObjectManager;
 use CBOR\Tag\TagObjectManager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
@@ -26,6 +27,33 @@ use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class VerifyHandler implements VerifyHandlerInterface
 {
+    /**
+     * Dependency injection configuration
+     *
+     * @config
+     * @var array
+     */
+    private static $dependencies = [
+        'Logger' => LoggerInterface::class . '.mfa',
+    ];
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger = null;
+
+    /**
+     * Sets the {@see $logger} member variable
+     *
+     * @param LoggerInterface|null $logger
+     * @return self
+     */
+    public function setLogger(?LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
     /**
      * Stores any data required to handle a login process with a method, and returns relevant state to be applied to the
      * front-end application managing the process.
@@ -87,7 +115,7 @@ class VerifyHandler implements VerifyHandlerInterface
             $response = $publicKeyCredential->getResponse();
 
             if (!$response instanceof AuthenticatorAssertionResponse) {
-                throw new Exception('why even have this?');
+                throw new ResponseTypeException('Unexpected response type found');
             }
 
             $authenticatorAssertionResponseValidator->check(
@@ -100,6 +128,7 @@ class VerifyHandler implements VerifyHandlerInterface
 
             return Result::create();
         } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
             throw $e;
         }
     }

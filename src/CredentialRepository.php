@@ -11,7 +11,7 @@ use Webauthn\CredentialRepository as CredentialRepositoryInterface;
 
 /**
  * This interface is required by the WebAuthn library but is too exhaustive for our "one security key per person"
- * registration. We only support one and it's stored on the registered method that's a dependency of the constructor
+ * registration. We only support one and it's stored on the RegisteredMethod that is a dependency of the constructor
  */
 class CredentialRepository implements CredentialRepositoryInterface
 {
