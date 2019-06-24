@@ -13,6 +13,7 @@ const fallbacks = require('../../../lang/src/en.json');
 export const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
   READY: 'READY', // Waiting for the user to start the process
+  ERROR: 'ERROR', // Something went wrong while loading or processing
   REGISTERING: 'REGISTERING', // Waiting for the security key / server
   FAILURE: 'FAILURE', // Timeout or other error from registration
   SUCCESS: 'SUCCESS', // Successful registration
@@ -26,8 +27,15 @@ class Register extends Component {
   constructor(props) {
     super(props);
 
+    let view = VIEWS.LOADING;
+    if (props.keyData) {
+      view = VIEWS.READY;
+    } else if (props.errors.length) {
+      view = VIEWS.ERROR;
+    }
+
     this.state = {
-      view: props.keyData ? VIEWS.READY : VIEWS.LOADING,
+      view,
       registrationData: null,
     };
 
@@ -129,6 +137,7 @@ class Register extends Component {
    * @returns {HTMLElement}
    */
   renderStatus() {
+    const { errors } = this.props;
     const { ss: { i18n } } = window;
 
     switch (this.state.view) {
@@ -160,6 +169,15 @@ class Register extends Component {
             <span className="status-message__icon"><CircleWarning size="32px" /></span>
             <span className="status-message__description">
               {i18n._t('MFAWebAuthnRegister.FAILURE', fallbacks['MFAWebAuthnRegister.FAILURE'])}
+            </span>
+          </div>
+        );
+      case VIEWS.ERROR:
+        return (
+          <div className="mfa-registration-container__status status-message--error">
+            <span className="status-message__icon"><CircleWarning size="32px" /></span>
+            <span className="status-message__description">
+              {errors.join(', ')}
             </span>
           </div>
         );
@@ -206,6 +224,10 @@ class Register extends Component {
             name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK'])
           },
         ];
+        break;
+      case VIEWS.ERROR:
+        // Deliberately do not provide any actions for backend errors, a refresh is required
+        actions = [];
         break;
       case VIEWS.READY:
         actions = [
@@ -299,13 +321,16 @@ class Register extends Component {
   }
 }
 
-
 Register.propTypes = {
   keyData: PropTypes.object,
   method: PropTypes.object.isRequired,
+  errors: PropTypes.arrayOf(PropTypes.string),
   onBack: PropTypes.func.isRequired,
   onCompleteRegistration: PropTypes.func.isRequired,
-  // uri: PropTypes.string.isRequired,
+};
+
+Register.defaultProps = {
+  errors: [],
 };
 
 Register.displayName = 'WebAuthnRegister';
