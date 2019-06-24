@@ -65,7 +65,7 @@ class RegisterHandler implements RegisterHandlerInterface
      * @var array
      */
     private static $dependencies = [
-        'Logger' => LoggerInterface::class . '.mfa',
+        'Logger' => '%$' . LoggerInterface::class . '.mfa',
     ];
 
     /**
