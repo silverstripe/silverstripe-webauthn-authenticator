@@ -3,8 +3,9 @@
 import { base64ToByteArray, byteArrayToBase64 } from './convert';
 
 /**
- * Start the WebAuthn registration process
+ * Start the Web Authentication process with the browser
  *
+ * @param {object} keyData
  * @returns {Promise<any>} Resolves if registration succeeds, rejects if not
  */
 export const performRegistration = (keyData) => new Promise((resolve, reject) => {
@@ -43,6 +44,12 @@ export const performRegistration = (keyData) => new Promise((resolve, reject) =>
     });
 });
 
+/**
+ * Starts the Web Authentication verification process with the browser
+ *
+ * @param {object} publicKey
+ * @returns {Promise<any>} Resolves if registration succeeds, rejects if not
+ */
 export const performVerification = (publicKey) => new Promise((resolve, reject) => {
   const parsed = {
     ...publicKey,
