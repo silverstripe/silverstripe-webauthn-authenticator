@@ -34,7 +34,7 @@ class VerifyHandler implements VerifyHandlerInterface
      * @var array
      */
     private static $dependencies = [
-        'Logger' => LoggerInterface::class . '.mfa',
+        'Logger' => '%$' . LoggerInterface::class . '.mfa',
     ];
 
     /**
