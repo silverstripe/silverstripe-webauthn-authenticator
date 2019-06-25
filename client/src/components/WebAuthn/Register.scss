@@ -1,4 +1,5 @@
-$color-status-icon: rgba(0,113,196,1); // $color-blue from mfa module
+$color-status-icon: rgba(0, 113, 196, 1); // $color-blue from mfa module
+$color-status-bad: rgba(169, 30, 46, 1); // $color-message-error from mfa module
 
 $padding-thumbnail: 20px;
 $sizing-thumbnail: 260px;
@@ -36,6 +37,14 @@ $grid-row-thumbnail: 1 / span 2;
 
 .status-message__description {
   margin-left: $spacing-status-message;
+}
+
+.status-message--error {
+  color: $color-status-bad;
+
+  .status-message__icon {
+    color: $color-status-bad;
+  }
 }
 
 .mfa-registration-container__thumbnail {
