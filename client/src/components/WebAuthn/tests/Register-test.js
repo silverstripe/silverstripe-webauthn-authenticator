@@ -92,7 +92,7 @@ describe('Register', () => {
   });
 
   describe('handleStartRegistration()', () => {
-    it('changes the view to REGISTERING when called', () => {
+    it('changes the view to PROMPTING when called', () => {
       auth.performRegistration.mockImplementation(() => Promise.resolve({}));
 
       const wrapper = shallow(
@@ -105,7 +105,7 @@ describe('Register', () => {
 
       wrapper.instance().handleStartRegistration();
 
-      expect(wrapper.instance().state.view).toEqual(VIEWS.REGISTERING);
+      expect(wrapper.instance().state.view).toEqual(VIEWS.PROMPTING);
     });
 
     it('changes the view to SUCCESS when complete', (complete) => {
@@ -212,7 +212,7 @@ describe('Register', () => {
         />
       );
 
-      wrapper.instance().setState({ view: VIEWS.REGISTERING }, () => {
+      wrapper.instance().setState({ view: VIEWS.PROMPTING }, () => {
         const actions = wrapper.find('.mfa-registration-container__actions').children();
 
         expect(actions).toHaveLength(2);
@@ -327,7 +327,7 @@ describe('Register', () => {
         />
       );
 
-      wrapper.instance().setState({ view: VIEWS.REGISTERING }, () => {
+      wrapper.instance().setState({ view: VIEWS.PROMPTING }, () => {
         const message = wrapper.find('.status-message--loading');
 
         expect(message).toHaveLength(1);

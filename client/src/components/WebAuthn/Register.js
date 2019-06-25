@@ -10,7 +10,7 @@ import LoadingIndicator from 'components/LoadingIndicator';
 
 const fallbacks = require('../../../lang/src/en.json');
 
-const VIEWS = {
+export const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
   READY: 'READY', // Waiting for the user to start the process
   ERROR: 'ERROR', // Something went wrong while loading or processing
