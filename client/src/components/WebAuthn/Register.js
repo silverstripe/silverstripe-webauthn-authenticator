@@ -4,9 +4,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { performRegistration } from 'lib/auth';
 
-import CircleTick from '../Icons/CircleTick';
-import CircleWarning from '../Icons/CircleWarning';
-import LoadingIndicator from '../LoadingIndicator';
+import CircleTick from 'components/Icons/CircleTick';
+import CircleWarning from 'components/Icons/CircleWarning';
+import LoadingIndicator from 'components/LoadingIndicator';
 
 const fallbacks = require('../../../lang/src/en.json');
 
@@ -14,9 +14,9 @@ export const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
   READY: 'READY', // Waiting for the user to start the process
   ERROR: 'ERROR', // Something went wrong while loading or processing
-  REGISTERING: 'REGISTERING', // Waiting for the security key / server
-  FAILURE: 'FAILURE', // Timeout or other error from registration
-  SUCCESS: 'SUCCESS', // Successful registration
+  PROMPTING: 'PROMPTING', // Waiting for the security key / server
+  FAILURE: 'FAILURE', // Timeout or other error from prompting
+  SUCCESS: 'SUCCESS', // Successful prompting, ready to proceed
 };
 
 /**
@@ -84,7 +84,7 @@ class Register extends Component {
    * Trigger the WebAuthn registration handler, which will present a prompt in some browsers.
    */
   handleStartRegistration() {
-    this.setState({ view: VIEWS.REGISTERING });
+    this.setState({ view: VIEWS.PROMPTING });
 
     performRegistration(this.props.keyData)
       .then(registrationData => this.setState({ view: VIEWS.SUCCESS, registrationData }))
@@ -143,7 +143,7 @@ class Register extends Component {
     switch (this.state.view) {
       case VIEWS.READY:
         return (<div className="mfa-registration-container__status status-message--empty" />);
-      case VIEWS.REGISTERING:
+      case VIEWS.PROMPTING:
       case VIEWS.LOADING:
       default:
         return (
@@ -241,7 +241,7 @@ class Register extends Component {
           },
         ];
         break;
-      case VIEWS.REGISTERING:
+      case VIEWS.PROMPTING:
         actions = [
           {
             action: this.handleStartRegistration,
