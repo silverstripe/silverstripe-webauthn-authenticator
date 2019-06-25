@@ -219,8 +219,9 @@ class Verify extends Component {
 }
 
 Verify.propTypes = {
+  method: PropTypes.object.isRequired,
   publicKey: publicKeyType,
-  onCompleteVerification: PropTypes.func,
+  onCompleteVerification: PropTypes.func.isRequired,
   moreOptionsControl: PropTypes.func,
   errors: PropTypes.arrayOf(PropTypes.string),
 };

@@ -8,8 +8,6 @@ const auth = require('lib/auth');
 
 jest.unmock('lib/auth');
 
-// eslint-disable-next-line no-unused-vars
-import fetch from 'isomorphic-fetch';
 import React from 'react';
 import Enzyme, { shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
