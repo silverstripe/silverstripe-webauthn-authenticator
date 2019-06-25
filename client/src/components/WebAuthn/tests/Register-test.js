@@ -42,6 +42,22 @@ describe('Register', () => {
     auth.performRegistration.mockClear();
   });
 
+  describe('handleBack()', () => {
+    it('triggers the onBack callback', () => {
+      const wrapper = shallow(
+        <Register
+          method={mockMethod}
+          onBack={onBackMock}
+          onCompleteRegistration={onCompleteRegistrationMock}
+        />
+      );
+
+      wrapper.instance().handleBack();
+
+      expect(onBackMock).toHaveBeenCalled();
+    });
+  });
+
   describe('handleNext()', () => {
     it('does not trigger onCompleteRegistration when registrationData is unavailable', () => {
       const wrapper = shallow(
@@ -371,6 +387,36 @@ describe('Register', () => {
       expect(wrapper.find('.mfa-registration-container__status')).toHaveLength(1);
       expect(wrapper.find('.mfa-registration-container__thumbnail')).toHaveLength(1);
       expect(wrapper.find('.mfa-registration-container__actions')).toHaveLength(1);
+    });
+  });
+
+  it('renders with the READY view if keyData is provided immediately', () => {
+    const wrapper = shallow(
+      <Register
+        method={mockMethod}
+        onBack={onBackMock}
+        onCompleteRegistration={onCompleteRegistrationMock}
+        keyData={{ data: true }}
+      />
+    );
+
+    expect(wrapper.instance().state.view).toEqual(VIEWS.READY);
+  });
+
+  it('transitions from LOADING to READY view when keyData is provided', (complete) => {
+    const wrapper = shallow(
+      <Register
+        method={mockMethod}
+        onBack={onBackMock}
+        onCompleteRegistration={onCompleteRegistrationMock}
+      />
+    );
+
+    expect(wrapper.instance().state.view).toEqual(VIEWS.LOADING);
+
+    wrapper.setProps({ keyData: { data: true } }, () => {
+      expect(wrapper.instance().state.view).toEqual(VIEWS.READY);
+      complete();
     });
   });
 });

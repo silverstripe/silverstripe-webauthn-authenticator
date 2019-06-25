@@ -45,15 +45,15 @@ class Register extends Component {
   }
 
   /**
-   * keyData may not be passed through on initial render, and we can't start without it.
-   *
-   * @todo Re-evaluate whether this code is required.
+   * Monitor for the introduction of keyData to transition into READY state if it isn't present
+   * during initial render.
    */
-  componentWillReceiveProps() {
+  componentDidUpdate() {
     const { keyData } = this.props;
     const { view } = this.state;
 
     if (view === VIEWS.LOADING && keyData) {
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState({ view: VIEWS.READY });
     }
   }
