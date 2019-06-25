@@ -2,9 +2,6 @@
 
 namespace SilverStripe\WebAuthn;
 
-use CBOR\Decoder;
-use CBOR\OtherObject\OtherObjectManager;
-use CBOR\Tag\TagObjectManager;
 use Cose\Algorithms;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -18,17 +15,12 @@ use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
-use Webauthn\AttestationStatement\AttestationObjectLoader;
-use Webauthn\AttestationStatement\AttestationStatementSupportManager;
-use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
-use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -36,6 +28,7 @@ use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class RegisterHandler implements RegisterHandlerInterface
 {
+    use BaseHandlerTrait;
     use Extensible;
     use Configurable;
 
@@ -115,18 +108,10 @@ class RegisterHandler implements RegisterHandlerInterface
         $options = $this->getCredentialCreationOptions($store);
         $data = json_decode($request->getBody(), true);
 
-        // CBOR
-        $decoder = new Decoder(new TagObjectManager(), new OtherObjectManager());
-
-        // Attestation statement support manager
-        $attestationStatementSupportManager = new AttestationStatementSupportManager();
-        $attestationStatementSupportManager->add(new NoneAttestationStatementSupport());
-        $attestationStatementSupportManager->add(new FidoU2FAttestationStatementSupport($decoder));
-
-        // Attestation object loader
-        $attestationObjectLoader = new AttestationObjectLoader($attestationStatementSupportManager, $decoder);
-
-        $publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader, $decoder);
+        $decoder = $this->getDecoder();
+        $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
+        $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
+        $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
 
         $credentialRepository = new CredentialRepository($store->getMember());
 
@@ -138,7 +123,7 @@ class RegisterHandler implements RegisterHandlerInterface
         );
 
         // Create a PSR-7 request
-        $request = ServerRequest::fromGlobals();
+        $psrRequest = ServerRequest::fromGlobals();
 
         try {
             $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
@@ -152,7 +137,7 @@ class RegisterHandler implements RegisterHandlerInterface
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
 
-            $authenticatorAttestationResponseValidator->check($response, $options, $request);
+            $authenticatorAttestationResponseValidator->check($response, $options, $psrRequest);
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
             return Result::create(false, 'Registration failed: ' . $e->getMessage());

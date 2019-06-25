@@ -2,9 +2,6 @@
 
 namespace SilverStripe\WebAuthn;
 
-use CBOR\Decoder;
-use CBOR\OtherObject\OtherObjectManager;
-use CBOR\Tag\TagObjectManager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Log\LoggerInterface;
@@ -13,20 +10,17 @@ use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
-use Webauthn\AttestationStatement\AttestationObjectLoader;
-use Webauthn\AttestationStatement\AttestationStatementSupportManager;
-use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
-use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\PublicKeyCredentialDescriptor;
-use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class VerifyHandler implements VerifyHandlerInterface
 {
+    use BaseHandlerTrait;
+
     /**
      * Dependency injection configuration
      *
@@ -85,18 +79,10 @@ class VerifyHandler implements VerifyHandlerInterface
 
         $data = json_decode($request->getBody(), true);
 
-        // CBOR
-        $decoder = new Decoder(new TagObjectManager(), new OtherObjectManager());
-
-        // Attestation statement support manager
-        $attestationStatementSupportManager = new AttestationStatementSupportManager();
-        $attestationStatementSupportManager->add(new NoneAttestationStatementSupport());
-        $attestationStatementSupportManager->add(new FidoU2FAttestationStatementSupport($decoder));
-
-        // Attestation object loader
-        $attestationObjectLoader = new AttestationObjectLoader($attestationStatementSupportManager, $decoder);
-
-        $publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader, $decoder);
+        $decoder = $this->getDecoder();
+        $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
+        $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
+        $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
 
         $credentialRepository = new CredentialRepository($store->getMember(), $registeredMethod);
 
@@ -155,6 +141,13 @@ class VerifyHandler implements VerifyHandlerInterface
         return 'WebAuthnVerify';
     }
 
+    /**
+     * @param StoreInterface $store
+     * @param RegisteredMethod $registeredMethod
+     * @param bool $reset
+     * @return PublicKeyCredentialRequestOptions
+     * @throws Exception
+     */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
         RegisteredMethod $registeredMethod,
