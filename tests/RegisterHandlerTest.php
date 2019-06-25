@@ -2,6 +2,7 @@
 
 namespace SilverStripe\WebAuthn\Tests;
 
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\MFA\Store\SessionStore;
 use SilverStripe\Security\Member;
@@ -32,7 +33,7 @@ class RegisterHandlerTest extends SapphireTest
     {
         parent::setUp();
 
-        $this->handler = new RegisterHandler();
+        $this->handler = Injector::inst()->create(RegisterHandler::class);
 
         $memberID = $this->logInWithPermission();
         /** @var Member $member */
@@ -112,5 +113,37 @@ class RegisterHandlerTest extends SapphireTest
             AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM,
             $authenticatorSelection->getAuthenticatorAttachment()
         );
+    }
+
+    public function testStart()
+    {
+        $store = new SessionStore($this->member);
+        $result = $this->handler->start($store);
+        $this->assertArrayHasKey('keyData', $result);
+
+        /** @var PublicKeyCredentialCreationOptions $options */
+        $options = $result['keyData'];
+        $this->assertInstanceOf(PublicKeyCredentialCreationOptions::class, $options);
+    }
+
+    public function testGetName()
+    {
+        $this->assertSame('Security key', $this->handler->getName());
+    }
+
+    public function testGetDescription()
+    {
+        $this->assertContains('A small USB device', $this->handler->getDescription());
+    }
+
+    public function testGetSupportLink()
+    {
+        RegisterHandler::config()->set('user_help_link', 'http://google.com');
+        $this->assertSame('http://google.com', $this->handler->getSupportLink());
+    }
+
+    public function testGetComponent()
+    {
+        $this->assertSame('WebAuthnRegister', $this->handler->getComponent());
     }
 }
