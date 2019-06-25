@@ -15,6 +15,7 @@ use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
+use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAttestationResponse;
@@ -106,26 +107,17 @@ class RegisterHandler implements RegisterHandlerInterface
     public function register(HTTPRequest $request, StoreInterface $store): Result
     {
         $options = $this->getCredentialCreationOptions($store);
-        $data = json_decode($request->getBody(), true);
-
-        $decoder = $this->getDecoder();
-        $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
-        $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
-        $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
-
-        $credentialRepository = new CredentialRepository($store->getMember());
-
-        $authenticatorAttestationResponseValidator = new AuthenticatorAttestationResponseValidator(
-            $attestationStatementSupportManager,
-            $credentialRepository,
-            new TokenBindingNotSupportedHandler(),
-            new ExtensionOutputCheckerHandler()
-        );
-
-        // Create a PSR-7 request
-        $psrRequest = ServerRequest::fromGlobals();
+        $data = json_decode((string) $request->getBody(), true);
 
         try {
+            if (empty($data['credentials'])) {
+                throw new ResponseDataException('Incomplete data, required information missing');
+            }
+
+            $decoder = $this->getDecoder();
+            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
+            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
+            $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
             $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
             $response = $publicKeyCredential->getResponse();
 
@@ -137,7 +129,12 @@ class RegisterHandler implements RegisterHandlerInterface
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
 
-            $authenticatorAttestationResponseValidator->check($response, $options, $psrRequest);
+            // Create a PSR-7 request
+            $psrRequest = ServerRequest::fromGlobals();
+
+            // Validate the webauthn response
+            $this->getAuthenticatorAttestationResponseValidator($attestationStatementSupportManager, $store)
+                ->check($response, $options, $psrRequest);
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
@@ -148,6 +145,25 @@ class RegisterHandler implements RegisterHandlerInterface
             'data' => $response->getAttestationObject()->getAuthData()->getAttestedCredentialData(),
             'counter' => null,
         ]);
+    }
+
+    /**
+     * @param AttestationStatementSupportManager $attestationStatementSupportManager
+     * @param StoreInterface $store
+     * @return AuthenticatorAttestationResponseValidator
+     */
+    protected function getAuthenticatorAttestationResponseValidator(
+        AttestationStatementSupportManager $attestationStatementSupportManager,
+        StoreInterface $store
+    ): AuthenticatorAttestationResponseValidator {
+        $credentialRepository = new CredentialRepository($store->getMember());
+
+        return new AuthenticatorAttestationResponseValidator(
+            $attestationStatementSupportManager,
+            $credentialRepository,
+            new TokenBindingNotSupportedHandler(),
+            new ExtensionOutputCheckerHandler()
+        );
     }
 
     /**
