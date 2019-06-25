@@ -2,6 +2,7 @@
 
 namespace SilverStripe\WebAuthn;
 
+use CBOR\Decoder;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Log\LoggerInterface;
@@ -34,7 +35,7 @@ class VerifyHandler implements VerifyHandlerInterface
     /**
      * @var LoggerInterface
      */
-    protected $logger = null;
+    protected $logger;
 
     /**
      * Sets the {@see $logger} member variable
@@ -71,52 +72,45 @@ class VerifyHandler implements VerifyHandlerInterface
      * @param StoreInterface $store
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
      * @return Result
-     * @throws Exception
      */
     public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): Result
     {
-        $options = $this->getCredentialRequestOptions($store, $registeredMethod);
-
-        $data = json_decode($request->getBody(), true);
-
-        $decoder = $this->getDecoder();
-        $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
-        $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
-        $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
-
-        $credentialRepository = new CredentialRepository($store->getMember(), $registeredMethod);
-
-        $authenticatorAssertionResponseValidator = new AuthenticatorAssertionResponseValidator(
-            $credentialRepository,
-            $decoder,
-            new TokenBindingNotSupportedHandler(),
-            new ExtensionOutputCheckerHandler()
-        );
-
-        // Create a PSR-7 request
-        $psrRequest = ServerRequest::fromGlobals();
+        $data = json_decode((string) $request->getBody(), true);
 
         try {
-            $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
-            $response = $publicKeyCredential->getResponse();
+            if (empty($data['credentials'])) {
+                throw new ResponseDataException('Incomplete data, required information missing');
+            }
 
+            $decoder = $this->getDecoder();
+            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
+            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
+            $publicKeyCredential = $this
+                ->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder)
+                ->load(base64_decode($data['credentials']));
+
+            $response = $publicKeyCredential->getResponse();
             if (!$response instanceof AuthenticatorAssertionResponse) {
                 throw new ResponseTypeException('Unexpected response type found');
             }
 
-            $authenticatorAssertionResponseValidator->check(
-                $publicKeyCredential->getRawId(),
-                $publicKeyCredential->getResponse(),
-                $options,
-                $psrRequest,
-                (string) $store->getMember()->ID
-            );
+            // Create a PSR-7 request
+            $psrRequest = ServerRequest::fromGlobals();
 
-            return Result::create();
+            $this->getAuthenticatorAssertionResponseValidator($decoder, $store, $registeredMethod)
+                ->check(
+                    $publicKeyCredential->getRawId(),
+                    $response,
+                    $this->getCredentialRequestOptions($store, $registeredMethod),
+                    $psrRequest,
+                    (string) $store->getMember()->ID
+                );
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
-            throw $e;
+            return Result::create(false, 'Verification failed: ' . $e->getMessage());
         }
+
+        return Result::create();
     }
 
     /**
@@ -159,8 +153,8 @@ class VerifyHandler implements VerifyHandlerInterface
             return PublicKeyCredentialRequestOptions::createFromArray($state['credentialOptions']);
         }
 
-        $data = json_decode($registeredMethod->Data, true);
-        $descriptor = PublicKeyCredentialDescriptor::createFromArray($data['descriptor']);
+        $data = json_decode((string) $registeredMethod->Data, true) ?? [];
+        $descriptor = PublicKeyCredentialDescriptor::createFromArray($data['descriptor'] ?? []);
 
         $options = new PublicKeyCredentialRequestOptions(
             random_bytes(32),
@@ -174,5 +168,26 @@ class VerifyHandler implements VerifyHandlerInterface
         $store->setState($state);
 
         return $options;
+    }
+
+    /**
+     * @param Decoder $decoder
+     * @param StoreInterface $store
+     * @param RegisteredMethod $registeredMethod
+     * @return AuthenticatorAssertionResponseValidator
+     */
+    protected function getAuthenticatorAssertionResponseValidator(
+        Decoder $decoder,
+        StoreInterface $store,
+        RegisteredMethod $registeredMethod
+    ): AuthenticatorAssertionResponseValidator {
+        $credentialRepository = new CredentialRepository($store->getMember(), $registeredMethod);
+
+        return new AuthenticatorAssertionResponseValidator(
+            $credentialRepository,
+            $decoder,
+            new TokenBindingNotSupportedHandler(),
+            new ExtensionOutputCheckerHandler()
+        );
     }
 }
