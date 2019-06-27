@@ -179,7 +179,6 @@ describe('Verify', () => {
 
       const container = wrapper.find('.mfa-verification-container__thumbnail');
       expect(container).toHaveLength(1);
-      expect(container.find('img[src="/foo/bar.jpg"]')).toHaveLength(1);
     });
   });
 
