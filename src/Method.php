@@ -23,7 +23,7 @@ class Method implements MethodInterface
     }
 
     /**
-     * Return the VerifyLHandler that is used to start and verify login attempts with this method
+     * Return the VerifyLHandler that is used to start and verify log in attempts with this method
      *
      * @return VerifyHandlerInterface
      */
@@ -50,7 +50,7 @@ class Method implements MethodInterface
     public function getThumbnail(): string
     {
         return (string) ModuleLoader::getModule('silverstripe/webauthn-authenticator')
-            ->getResource('client/dist/images/u2f.svg')
+            ->getResource('client/dist/images/securityKey.svg')
             ->getURL();
     }
 

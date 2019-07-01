@@ -50,8 +50,8 @@ class VerifyHandler implements VerifyHandlerInterface
     }
 
     /**
-     * Stores any data required to handle a login process with a method, and returns relevant state to be applied to the
-     * front-end application managing the process.
+     * Stores any data required to handle a log in process with a method, and returns relevant state to be applied to
+     * the front-end application managing the process.
      *
      * @param StoreInterface $store An object that hold session data (and the Member) that can be mutated
      * @param RegisteredMethod $method The RegisteredMethod instance that is being verified
