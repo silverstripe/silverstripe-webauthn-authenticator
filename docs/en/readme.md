@@ -1,13 +1,17 @@
 # Developer documentation
 
-## What is WebAuthn
+## What is Web Authentication (WebAuthn)?
 
-We use the web-auth/webauthn-framework PHP library to provide support for the Web Authentication protocol:
+We use the [web-auth/webauthn-framework PHP library](https://github.com/web-auth/webauthn-framework) to provide support
+for the Web Authentication protocol:
 
 > Webauthn defines an API enabling the creation and use of strong, attested, scoped, public key-based credentials by
 > web applications, for the purpose of strongly authenticating users.
 
-See https://github.com/web-auth/webauthn-framework for more information on the underlying PHP library.
+This module is a SilverStripe wrapper for implementing this library, and provides the frontend UI components to work
+with [the silverstripe/mfa module](https://github.com/silverstripe/silverstripe-mfa).
+
+For more information about WebAuthn, see [the Guide to Web Authentication](https://webauthn.guide/).
 
 ## Configuration
 

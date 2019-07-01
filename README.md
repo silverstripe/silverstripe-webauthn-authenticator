@@ -5,15 +5,23 @@
 [![codecov](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator)
 [![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
----
+The silverstripe/webauthn-authenticator module provides a [Web Authentication (WebAuthn)](https://webauthn.guide/)
+authentication method for the [silverstripe/mfa module](https://github.com/silverstripe/silverstripe-mfa), which
+allows you to use the Web Authentication browser API to provide a second factor for your multi-factor authentication
+login system.
 
-# Readme details coming soon 
+The WebAuthn protocol supersedes FIDO U2F, while it still supports U2F-only authentication devices. 
+
+By default, we expect that this module would be used with multi-platform authenticators such as a
+[Yubikey security key](https://www.yubico.com/). You may choose to configure the module to support single-platform
+authenticators such as fingerprint scanners. More information on this can be found in the
+[developer documentation](docs/en/readme.md).
 
 ## Requirements
 
 * SilverStripe ^4.1
 * silverstripe/mfa ^4.0
-* [Yarn](https://yarnpkg.com/lang/en/), [NodeJS](https://nodejs.org/en/) (6.x) and [npm](https://npmjs.com) (for building
+* [Yarn](https://yarnpkg.com/lang/en/), [NodeJS](https://nodejs.org/en/) (>=10) and [npm](https://npmjs.com) (for building
   frontend assets)
 
 ## Installation
@@ -23,6 +31,8 @@ Install with Composer:
 ```
 composer require silverstripe/webauthn-authenticator ^4.0
 ```
+
+For SilverStripe 3.7 support please use `silverstripe/webauthn-authenticator ^3.0`.
 
 The WebAuthn authenticator module automatically configures itself when installed.
 
