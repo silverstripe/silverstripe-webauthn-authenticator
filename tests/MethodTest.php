@@ -33,7 +33,7 @@ class MethodTest extends SapphireTest
     public function testGetThumbnail()
     {
         $method = new Method();
-        $this->assertContains('images/u2f.svg', $method->getThumbnail());
+        $this->assertContains('images/securityKey.svg', $method->getThumbnail());
     }
 
     public function testApplyRequirements()
