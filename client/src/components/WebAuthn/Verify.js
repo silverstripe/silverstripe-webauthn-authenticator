@@ -8,6 +8,7 @@ import { performVerification } from 'lib/auth';
 import CircleTick from 'components/Icons/CircleTick';
 import CircleWarning from 'components/Icons/CircleWarning';
 import LoadingIndicator from 'components/LoadingIndicator';
+import ActivateToken from '../Icons/ActivateToken';
 
 const fallbacks = require('../../../lang/src/en.json');
 
@@ -153,14 +154,9 @@ class Verify extends Component {
    * @returns {HTMLElement}
    */
   renderThumbnail() {
-    const { method } = this.props;
-
     return (
       <div className="mfa-verification-container__thumbnail">
-        <img
-          src={method.thumbnail}
-          alt={method.name}
-        />
+        <ActivateToken />
       </div>
     );
   }
