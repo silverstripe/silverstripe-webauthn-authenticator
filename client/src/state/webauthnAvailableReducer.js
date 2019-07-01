@@ -7,16 +7,30 @@
  * @returns {object}
  */
 export default function webauthnAvailableReducer(state = {}) {
-  // See https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#Interfaces
-  const isAvailable = typeof window.AuthenticatorResponse !== 'undefined';
+  let isAvailable = true;
+  let unavailableMessage = null;
+
+  // Enforce HTTPS
+  if (window.location.protocol !== 'https:') {
+    isAvailable = false;
+    unavailableMessage = window.ss.i18n._t(
+      'WebAuthnReducer.NOT_ON_HTTPS',
+      'This method can only be used over HTTPS.'
+    );
+  } else if (typeof window.AuthenticatorResponse === 'undefined') {
+    // Check for the WebAuthn browser API
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#Interfaces
+    isAvailable = false;
+    unavailableMessage = window.ss.i18n._t(
+      'WebAuthnReducer.UNSUPPORTED_BROWSER',
+      'Security keys are not supported by this browser'
+    );
+  }
 
   // Only provide a "mfaRegister" state override if unavailable
   const webAuthnAvailable = isAvailable ? {} : {
     isAvailable,
-    unavailableMessage: window.ss.i18n._t(
-      'WebAuthnReducer.UNSUPPORTED_BROWSER',
-      'Security keys are not supported by this browser'
-    ),
+    unavailableMessage,
   };
 
   return {
