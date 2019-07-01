@@ -3,7 +3,7 @@
     "MFAWebAuthnRegister.COMPLETEREGISTRATION": "Complete registration",
     "MFAWebAuthnRegister.DESCRIPTION": "Contact your administrator if you require a security key. ",
     "MFAWebAuthnRegister.FAILURE": "Something went wrong. Please re-insert your key and try again",
-    "MFAWebAuthnRegister.HELP": "How to use security keys",
+    "MFAWebAuthnRegister.HELP": "How to use security keys.",
     "MFAWebAuthnRegister.INSTRUCTION": "Insert security key and press {button}",
     "MFAWebAuthnRegister.REGISTER": "Register key",
     "MFAWebAuthnRegister.REGISTERING": "Registering",
