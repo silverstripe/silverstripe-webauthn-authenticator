@@ -1,7 +1,7 @@
 {
     "name": "silverstripe/webauthn-authenticator",
     "description": "A WebAuthn authenticator that plugs into the silverstripe/mfa module",
-    "type": "silverstripe-vendormodule",
+    "type": "silverstripe-module",
     "keywords": [
         "silverstripe",
         "CMS"
