@@ -99,7 +99,7 @@ class Register extends Component {
    */
   renderDescription() {
     const { ss: { i18n } } = window;
-    const { method } = this.props;
+    const { method: { supportLink, supportText } } = this.props;
 
     const registerKeyT = i18n._t(
       'MFAWebAuthnRegister.REGISTER',
@@ -117,13 +117,15 @@ class Register extends Component {
         <p>
           {i18n._t('MFAWebAuthnRegister.DESCRIPTION', fallbacks['MFAWebAuthnRegister.DESCRIPTION'])}
 
-          <a
-            href={method.supportLink}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {i18n._t('MFAWebAuthnRegister.HELP', fallbacks['MFAWebAuthnRegister.HELP'])}
-          </a>
+          {supportLink &&
+            <a
+              href={supportLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {supportText || i18n._t('MFAWebAuthnRegister.HELP', fallbacks['MFAWebAuthnRegister.HELP'])}
+            </a>
+          }
         </p>
 
         {/* eslint-disable-next-line react/no-danger */}

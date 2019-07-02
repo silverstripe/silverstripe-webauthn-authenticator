@@ -17,7 +17,7 @@ For more information about WebAuthn, see [the Guide to Web Authentication](https
 
 ### "Find out more" links
 
-You can configure (or remove) the "Find out more" links shown to users when the "Security key" authentication method
+You can configure (or remove) the "help" links shown to users when the "Security key" authentication method
 option is shown in multi-factor authentication registration or verification flows by adjusting the user help link
 in configuration:
 
