@@ -2,13 +2,12 @@
 
 namespace SilverStripe\WebAuthn;
 
-use SilverStripe\Control\Director;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Core\Manifest\ModuleLoader;
-use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
+use Director;
+use Injector;
+use Requirements;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
+use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Method\MethodInterface;
-use SilverStripe\View\Requirements;
 
 class Method implements MethodInterface
 {
@@ -49,9 +48,8 @@ class Method implements MethodInterface
      */
     public function getThumbnail(): string
     {
-        return (string) ModuleLoader::getModule('silverstripe/webauthn-authenticator')
-            ->getResource('client/dist/images/securityKey.svg')
-            ->getURL();
+        $module = $this->getModuleName();
+        return "/$module/client/dist/images/securityKey.svg";
     }
 
     /**
@@ -62,8 +60,9 @@ class Method implements MethodInterface
      */
     public function applyRequirements(): void
     {
-        Requirements::javascript('silverstripe/webauthn-authenticator: client/dist/js/bundle.js');
-        Requirements::css('silverstripe/webauthn-authenticator: client/dist/styles/bundle.css');
+        $moduleName = $this->getModuleName();
+        Requirements::javascript($moduleName . '/client/dist/js/bundle.js');
+        Requirements::css($moduleName . '/client/dist/styles/bundle.css');
     }
 
     public function isAvailable(): bool
@@ -74,5 +73,17 @@ class Method implements MethodInterface
     public function getUnavailableMessage(): string
     {
         return _t(__CLASS__ . '.REQUIRES_HTTPS', 'This method can only be used over HTTPS.');
+    }
+
+    /**
+     * Get directory name this module is installed into
+     * SS3 is not specific or caring about what the module is named, only that it exists and is a valid SilverStripe
+     * mdoule.
+     *
+     * @return string
+     */
+    private function getModuleName(): string
+    {
+        return basename(realpath(__DIR__ . DIRECTORY_SEPARATOR . '..'));
     }
 }

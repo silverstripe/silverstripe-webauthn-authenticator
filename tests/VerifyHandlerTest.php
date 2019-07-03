@@ -3,16 +3,15 @@
 namespace SilverStripe\WebAuthn\Tests;
 
 use Exception;
+use Injector;
+use Member;
+use MFARegisteredMethod as RegisteredMethod;
 use PHPUnit_Framework_MockObject_MockObject;
-use Psr\Log\LoggerInterface;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\SapphireTest;
-use SilverStripe\MFA\Model\RegisteredMethod;
+use SapphireTest;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\SessionStore;
-use SilverStripe\Security\Member;
 use SilverStripe\WebAuthn\VerifyHandler;
+use SS_HTTPRequest;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
@@ -35,7 +34,7 @@ class VerifyHandlerTest extends SapphireTest
     protected $member;
 
     /**
-     * @var HTTPRequest
+     * @var SS_HTTPRequest
      */
     protected $request;
 
@@ -54,11 +53,11 @@ class VerifyHandlerTest extends SapphireTest
      */
     protected $mockData = [];
 
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
 
-        $this->request = new HTTPRequest('GET', '/');
+        $this->request = new SS_HTTPRequest('GET', '/');
         $this->handler = Injector::inst()->create(VerifyHandler::class);
 
         $memberID = $this->logInWithPermission();
@@ -129,9 +128,6 @@ class VerifyHandlerTest extends SapphireTest
         }
         $handlerMock->expects($this->any())->method('getAuthenticatorAssertionResponseValidator')
             ->willReturn($responseValidatorMock);
-
-        $loggerMock = $this->createMock(LoggerInterface::class);
-        $handlerMock->setLogger($loggerMock);
 
         $loaderMock = $this->createMock(PublicKeyCredentialLoader::class);
         $handlerMock->expects($this->once())->method('getPublicKeyCredentialLoader')->willReturn($loaderMock);

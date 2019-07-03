@@ -3,9 +3,9 @@
 namespace SilverStripe\WebAuthn\Tests;
 
 use InvalidArgumentException;
-use SilverStripe\Dev\SapphireTest;
-use SilverStripe\MFA\Model\RegisteredMethod;
-use SilverStripe\Security\Member;
+use Member;
+use MFARegisteredMethod as RegisteredMethod;
+use SapphireTest;
 use SilverStripe\WebAuthn\CredentialRepository;
 use Webauthn\AttestedCredentialData;
 
@@ -28,7 +28,7 @@ class CredentialRepositoryTest extends SapphireTest
      */
     protected $repository;
 
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
 
