@@ -65,4 +65,6 @@ If you would like to make contributions to the module please ensure you raise a 
 
 ## Notes
 
-SilverStripe 3 is approaching end of life (EOL) in terms of support. This backport has been made specifically to help protect older systems while they undergo upgrade projects, as time is often a factor with budgeting. In this regard support will be limited for this version of the Webauthn Authenticator, however if your issue is still applicable in the latest 4.x release please do log the issue and/or create a pull request to resolve the issue against the relevant newer branch.
+Unfortunately, [SilverStripe 3 has entered limited support in June 2018](https://www.silverstripe.org/blog/update-on-silverstripe-5-x/). This means we'll only be fixing critical bugs and security issues for SilverStripe 3 going forward.
+
+You can read the [SilverStripe Roadmap](https://www.silverstripe.org/software/roadmap/) for more information on our support commitments.
