@@ -1,8 +1,7 @@
 en:
   SilverStripe\WebAuthn\Method:
+    NAME: 'Security key'
     REQUIRES_HTTPS: 'This method can only be used over HTTPS.'
   SilverStripe\WebAuthn\RegisterHandler:
     DESCRIPTION: 'A small USB device which is used for verifying you'
-    NAME: 'Security key'
-  SilverStripe\WebAuthn\VerifyHandler:
-    LEAD_IN: 'Verify with security key'
+    SUPPORT_LINK_DESCRIPTION: 'How to use security keys.'
