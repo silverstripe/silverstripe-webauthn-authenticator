@@ -5,12 +5,13 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use Psr\Log\LoggerInterface;
-use SilverStripe\Control\HTTPRequest;
+use MFARegisteredMethod as RegisteredMethod;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
-use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
+use SS_HTTPRequest;
+use SS_Log;
+use SS_Object;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
@@ -18,36 +19,9 @@ use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
-class VerifyHandler implements VerifyHandlerInterface
+class VerifyHandler extends SS_Object implements VerifyHandlerInterface
 {
     use BaseHandlerTrait;
-
-    /**
-     * Dependency injection configuration
-     *
-     * @config
-     * @var array
-     */
-    private static $dependencies = [
-        'Logger' => '%$' . LoggerInterface::class . '.mfa',
-    ];
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * Sets the {@see $logger} member variable
-     *
-     * @param LoggerInterface|null $logger
-     * @return self
-     */
-    public function setLogger(?LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-        return $this;
-    }
 
     /**
      * Stores any data required to handle a log in process with a method, and returns relevant state to be applied to
@@ -68,12 +42,12 @@ class VerifyHandler implements VerifyHandlerInterface
      * Verify the request has provided the right information to verify the member that aligns with any sessions state
      * that may have been set prior
      *
-     * @param HTTPRequest $request
+     * @param SS_HTTPRequest $request
      * @param StoreInterface $store
      * @param RegisteredMethod $registeredMethod The RegisteredMethod instance that is being verified
      * @return Result
      */
-    public function verify(HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): Result
+    public function verify(SS_HTTPRequest $request, StoreInterface $store, RegisteredMethod $registeredMethod): Result
     {
         $data = json_decode((string) $request->getBody(), true);
 
@@ -106,7 +80,7 @@ class VerifyHandler implements VerifyHandlerInterface
                     (string) $store->getMember()->ID
                 );
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
+            SS_Log::log($e, SS_Log::ERR);
             return Result::create(false, 'Verification failed: ' . $e->getMessage());
         }
 

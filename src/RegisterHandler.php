@@ -3,18 +3,17 @@
 namespace SilverStripe\WebAuthn;
 
 use Cose\Algorithms;
+use Director;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use Psr\Log\LoggerInterface;
-use SilverStripe\Control\Director;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Extensible;
+use Member;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
-use SilverStripe\Security\Member;
-use SilverStripe\SiteConfig\SiteConfig;
+use SiteConfig;
+use SS_HTTPRequest;
+use SS_Log;
+use SS_Object;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
@@ -27,11 +26,9 @@ use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
-class RegisterHandler implements RegisterHandlerInterface
+class RegisterHandler extends SS_Object implements RegisterHandlerInterface
 {
     use BaseHandlerTrait;
-    use Extensible;
-    use Configurable;
 
     /**
      * Provide a user help link that will be available when registering backup codes
@@ -44,40 +41,15 @@ class RegisterHandler implements RegisterHandlerInterface
 
     /**
      * The default attachment mode to use for Authentication Selection Criteria.
+     * SilverStripe 3's manifest parser requires the full namespace to be set here.
      *
      * See {@link getAuthenticatorSelectionCriteria()} for more information.
      *
      * @config
      * @var string
      */
-    private static $authenticator_attachment = AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
-
-    /**
-     * Dependency injection configuration
-     *
-     * @config
-     * @var array
-     */
-    private static $dependencies = [
-        'Logger' => '%$' . LoggerInterface::class . '.mfa',
-    ];
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger = null;
-
-    /**
-     * Sets the {@see $logger} member variable
-     *
-     * @param LoggerInterface|null $logger
-     * @return self
-     */
-    public function setLogger(?LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-        return $this;
-    }
+    private static $authenticator_attachment =
+        \Webauthn\AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
 
     /**
      * Stores any data required to handle a registration process with a method, and returns relevant state to be applied
@@ -99,12 +71,12 @@ class RegisterHandler implements RegisterHandlerInterface
     /**
      * Confirm that the provided details are valid, and create a new RegisteredMethod against the member.
      *
-     * @param HTTPRequest $request
+     * @param SS_HTTPRequest $request
      * @param StoreInterface $store
      * @return Result
      * @throws Exception
      */
-    public function register(HTTPRequest $request, StoreInterface $store): Result
+    public function register(SS_HTTPRequest $request, StoreInterface $store): Result
     {
         $options = $this->getCredentialCreationOptions($store);
         $data = json_decode((string) $request->getBody(), true);
@@ -136,7 +108,7 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getAuthenticatorAttestationResponseValidator($attestationStatementSupportManager, $store)
                 ->check($response, $options, $psrRequest);
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
+            SS_Log::log($e, SS_Log::ERR);
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
         }
 
@@ -218,7 +190,7 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         // Relying party entity ONLY allows domains or subdomains. Remove ports or anything else that isn't already.
         // See https://github.com/web-auth/webauthn-framework/blob/v1.2.2/doc/webauthn/PublicKeyCredentialCreation.md#relying-party-entity
-        $host = parse_url(Director::host(), PHP_URL_HOST);
+        $host = parse_url(Director::protocolAndHost(), PHP_URL_HOST);
 
         return new PublicKeyCredentialRpEntity(
             (string) SiteConfig::current_site_config()->Title,

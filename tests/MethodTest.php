@@ -2,10 +2,10 @@
 
 namespace SilverStripe\WebAuthn\Tests;
 
-use SilverStripe\Control\Director;
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Dev\SapphireTest;
-use SilverStripe\View\Requirements;
+use Config;
+use Director;
+use Requirements;
+use SapphireTest;
 use SilverStripe\WebAuthn\Method;
 use SilverStripe\WebAuthn\RegisterHandler;
 use SilverStripe\WebAuthn\VerifyHandler;
@@ -42,21 +42,23 @@ class MethodTest extends SapphireTest
         $method = new Method();
         $method->applyRequirements();
 
-        $this->assertCount(1, Requirements::backend()->getJavascript());
-        $this->assertCount(1, Requirements::backend()->getCSS());
+        $this->assertCount(1, Requirements::backend()->get_javascript());
+        $this->assertCount(1, Requirements::backend()->get_css());
     }
 
     public function testIsAvailableUnderHttps()
     {
         $method = new Method();
-        Director::config()->set('alternate_base_url', 'https://mywebsite.com');
+        Config::inst()->update(Director::class, 'alternate_protocol', 'https');
+        Config::inst()->update(Director::class, 'alternate_base_url', 'mywebsite.com');
         $this->assertTrue($method->isAvailable());
     }
 
     public function testIsNotAvailableUnderHttp()
     {
         $method = new Method();
-        Director::config()->set('alternate_base_url', 'http://mywebsite.com');
+        Config::inst()->update(Director::class, 'alternate_protocol', 'http');
+        Config::inst()->update(Director::class, 'alternate_base_url', 'mywebsite.com');
         $this->assertFalse($method->isAvailable());
     }
 

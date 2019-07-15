@@ -2,16 +2,16 @@
 
 namespace SilverStripe\WebAuthn\Tests;
 
+use Config;
 use Exception;
+use Injector;
+use Member;
 use PHPUnit_Framework_MockObject_MockObject;
-use Psr\Log\LoggerInterface;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\SapphireTest;
+use SapphireTest;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\SessionStore;
-use SilverStripe\Security\Member;
 use SilverStripe\WebAuthn\RegisterHandler;
+use SS_HTTPRequest;
 use Webauthn\AttestationStatement\AttestationObject;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAttestationResponse;
@@ -38,7 +38,7 @@ class RegisterHandlerTest extends SapphireTest
     protected $member;
 
     /**
-     * @var HTTPRequest
+     * @var SS_HTTPRequest
      */
     protected $request;
 
@@ -52,11 +52,11 @@ class RegisterHandlerTest extends SapphireTest
      */
     protected $originalServer;
 
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
 
-        $this->request = new HTTPRequest('GET', '/');
+        $this->request = new SS_HTTPRequest('GET', '/');
         $this->handler = Injector::inst()->create(RegisterHandler::class);
 
         $memberID = $this->logInWithPermission();
@@ -68,13 +68,11 @@ class RegisterHandlerTest extends SapphireTest
         $this->originalServer = $_SERVER;
 
         // Set default configuration settings
-        RegisterHandler::config()->set(
-            'authenticator_attachment',
-            AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM
-        );
+        RegisterHandler::config()->authenticator_attachment =
+            AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM;
     }
 
-    protected function tearDown()
+    public function tearDown()
     {
         $_SERVER = $this->originalServer;
 
@@ -88,7 +86,8 @@ class RegisterHandlerTest extends SapphireTest
      */
     public function testRelyingPartyEntityDomainIncludesSilverStripeDomain(string $baseUrl, string $expected)
     {
-        $_SERVER['HTTP_HOST'] = $baseUrl;
+        $oldBaseURL = Config::inst()->get('Director', 'alternate_base_url');
+        Config::inst()->update('Director', 'alternate_base_url', $baseUrl);
 
         $result = $this->handler->start($this->store);
         $this->assertArrayHasKey('keyData', $result);
@@ -103,6 +102,8 @@ class RegisterHandlerTest extends SapphireTest
             $relyingPartyEntity->getId(),
             'Relying party entity should identify the current SilverStripe domain'
         );
+
+        Config::inst()->update('Director', 'alternate_base_url', $oldBaseURL);
     }
 
     /**
@@ -177,9 +178,6 @@ class RegisterHandlerTest extends SapphireTest
         }
         $handlerMock->expects($this->any())->method('getAuthenticatorAttestationResponseValidator')
             ->willReturn($responseValidatorMock);
-
-        $loggerMock = $this->createMock(LoggerInterface::class);
-        $handlerMock->setLogger($loggerMock);
 
         $loaderMock = $this->createMock(PublicKeyCredentialLoader::class);
         $handlerMock->expects($this->once())->method('getPublicKeyCredentialLoader')->willReturn($loaderMock);
@@ -265,7 +263,7 @@ class RegisterHandlerTest extends SapphireTest
 
     public function testGetSupportLink()
     {
-        RegisterHandler::config()->set('user_help_link', 'http://google.com');
+        RegisterHandler::config()->user_help_link = 'http://google.com';
         $this->assertSame('http://google.com', $this->handler->getSupportLink());
     }
 

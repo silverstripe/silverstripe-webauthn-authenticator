@@ -3,8 +3,8 @@
 namespace SilverStripe\WebAuthn;
 
 use InvalidArgumentException;
-use SilverStripe\MFA\Model\RegisteredMethod;
-use SilverStripe\Security\Member;
+use Member;
+use MFARegisteredMethod as RegisteredMethod;
 use TypeError;
 use Webauthn\AttestedCredentialData;
 use Webauthn\CredentialRepository as CredentialRepositoryInterface;
