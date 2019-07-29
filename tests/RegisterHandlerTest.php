@@ -250,25 +250,4 @@ class RegisterHandlerTest extends SapphireTest
             ],
         ];
     }
-
-    public function testGetName()
-    {
-        $this->assertSame('Security key', $this->handler->getName());
-    }
-
-    public function testGetDescription()
-    {
-        $this->assertContains('A small USB device', $this->handler->getDescription());
-    }
-
-    public function testGetSupportLink()
-    {
-        RegisterHandler::config()->user_help_link = 'http://google.com';
-        $this->assertSame('http://google.com', $this->handler->getSupportLink());
-    }
-
-    public function testGetComponent()
-    {
-        $this->assertSame('WebAuthnRegister', $this->handler->getComponent());
-    }
 }

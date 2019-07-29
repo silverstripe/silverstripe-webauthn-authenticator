@@ -183,14 +183,4 @@ class VerifyHandlerTest extends SapphireTest
             ],
         ];
     }
-
-    public function testGetLeadInLabel()
-    {
-        $this->assertContains('security key', $this->handler->getLeadInLabel());
-    }
-
-    public function testGetComponent()
-    {
-        $this->assertSame('WebAuthnVerify', $this->handler->getComponent());
-    }
 }
