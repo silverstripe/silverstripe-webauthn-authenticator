@@ -38,9 +38,19 @@
   height: $sizing-thumbnail;
   padding: $padding-thumbnail;
   width: $sizing-thumbnail;
+  display: none;
+
+  @media screen and (min-width: $mobile-breakpoint) {
+    display: block;
+  }
 }
 
 .mfa-registration-container__actions {
   grid-column: $grid-column-content;
   grid-row: $grid-row-actions;
+  margin-top: 20px;
+
+  @media screen and (min-width: $mobile-breakpoint) {
+    margin-top: 0;
+  }
 }
