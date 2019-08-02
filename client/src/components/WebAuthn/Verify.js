@@ -172,14 +172,14 @@ class Verify extends Component {
     const { failure, success } = this.state;
 
     if (success) {
-      return <div className="mfa-verification-container__actions" />;
+      return <div className="mfa-verification-container__actions mfa-action-list" />;
     }
 
     const retryName = i18n._t('MFAWebAuthnVerify.RETRY', fallbacks['MFAWebAuthnVerify.RETRY']);
     const retryButton = (
       <button
         key={retryName}
-        className="btn btn-primary"
+        className="btn mfa-action-list__item btn-primary"
         disabled={false}
         onClick={this.handleRetry}
         type="button"
@@ -189,7 +189,7 @@ class Verify extends Component {
     );
 
     return (
-      <div className="mfa-verification-container__actions">
+      <div className="mfa-verification-container__actions mfa-action-list">
         {failure ? retryButton : null}
         {moreOptionsControl}
       </div>
