@@ -150,6 +150,11 @@ class RegisterHandler implements RegisterHandlerInterface
             $options->getUser()->getId()
         );
 
+        // Clear the repository so only one key is registered at a time
+        // NOTE: This can be considered temporary behaviour until the UI supports managing multiple keys
+        $credentialRepository->reset();
+
+        // Persist the "credential source"
         $credentialRepository->saveCredentialSource($source);
 
         return Result::create()->setContext($credentialRepository->toArray());
@@ -196,7 +201,7 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     public function getSupportLink(): string
     {
-        return static::config()->get('user_help_link') ?: '';
+        return $this->config()->get('user_help_link') ?: '';
     }
 
     /**

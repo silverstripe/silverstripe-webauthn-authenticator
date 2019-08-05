@@ -68,6 +68,8 @@ class VerifyHandlerTest extends SapphireTest
         $this->store = new SessionStore($this->member);
 
         $this->registeredMethod = new RegisteredMethod();
+
+        // phpcs:disable
         $this->registeredMethod->Data = json_encode([
             'g8e1UH4B1gUYl\/7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN\/e34hDE1Mnd4FSOoNW6B+p7xB2tqj28svkJQh1Q==' => [
                 'source' => [
@@ -89,6 +91,7 @@ class VerifyHandlerTest extends SapphireTest
                 'counter' => 0,
             ]
         ]);
+        // phpcs:enable
     }
 
     /**
