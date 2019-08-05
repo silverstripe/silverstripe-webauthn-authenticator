@@ -6,6 +6,7 @@ use CBOR\Decoder;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use MFARegisteredMethod as RegisteredMethod;
+use SilverStripe\MFA\Exception\AuthenticationFailedException;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
@@ -15,7 +16,6 @@ use SS_Object;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
@@ -36,7 +36,7 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
     public function start(StoreInterface $store, RegisteredMethod $method): array
     {
         return [
-            'publicKey' => $this->getCredentialRequestOptions($store, true),
+            'publicKey' => $this->getCredentialRequestOptions($store, $method, true),
         ];
     }
 
@@ -77,7 +77,7 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
                 ->check(
                     $publicKeyCredential->getRawId(),
                     $response,
-                    $this->getCredentialRequestOptions($store),
+                    $this->getCredentialRequestOptions($store, $registeredMethod),
                     $psrRequest,
                     (string) $store->getMember()->ID
                 );
@@ -108,6 +108,7 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
      */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
+        RegisteredMethod $registeredMethod = null,
         $reset = false
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
@@ -117,8 +118,12 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
         }
 
         // Use the interface methods (despite the fact the "repository" is per-member in this module)
-        $validCredentials = $this->getCredentialRepository($store)
+        $validCredentials = $this->getCredentialRepository($store, $registeredMethod)
             ->findAllForUserEntity($this->getUserEntity($store->getMember()));
+
+        if (!count($validCredentials)) {
+            throw new AuthenticationFailedException('User does not appear to have any credentials loaded for webauthn');
+        }
 
         $descriptors = array_map(function(PublicKeyCredentialSource $source) {
             return $source->getPublicKeyCredentialDescriptor();

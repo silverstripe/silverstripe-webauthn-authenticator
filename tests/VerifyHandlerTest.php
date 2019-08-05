@@ -68,25 +68,34 @@ class VerifyHandlerTest extends SapphireTest
 
         $this->registeredMethod = new RegisteredMethod();
         $this->registeredMethod->Data = json_encode([
-            'descriptor' => [
-                'type' => 'public-key',
-                'id' => '7lE6zdHESCF3/qSijHVuTwlTNi/yZSD/XP6Nm6HBI8YLA0uzPqyU4U4RxyZyuKXEPiIENEr509TekP2mDKrFoQ=='
-            ],
-            'data' => [
-                'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA==',
-                'credentialId' => '7lE6zdHESCF3/qSijHVuTwlTNi/yZSD/XP6Nm6HBI8YLPiIENEr509TekP2mDKrFoQ==',
-                'credentialPublicKey' => 'pU4vyn6OmHbdDyx7nWsJD+/2CycZkGzJ1u3TVj+c='
-            ],
-            'counter' => null,
+            'g8e1UH4B1gUYl\/7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN\/e34hDE1Mnd4FSOoNW6B+p7xB2tqj28svkJQh1Q==' => [
+                'source' => [
+                    'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW6B-p7xB2tqj28svkJQh1Q',
+                    'type' => 'public-key',
+                    'transports' =>
+                        array (
+                        ),
+                    'attestationType' => 'none',
+                    'trustPath' =>
+                        array (
+                            'type' => 'empty',
+                        ),
+                    'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
+                    'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
+                    'userHandle' => 'MQ',
+                    'counter' => 268,
+                ],
+                'counter' => 0,
+            ]
         ]);
     }
 
     /**
-     * @expectedException \Assert\InvalidArgumentException
+     * @expectedException \SilverStripe\MFA\Exception\AuthenticationFailedException
      */
     public function testStartThrowsExceptionWithMissingData()
     {
-        $this->registeredMethod->Data = null;
+        $this->registeredMethod->Data = '';
         $this->handler->start($this->store, $this->registeredMethod);
     }
 

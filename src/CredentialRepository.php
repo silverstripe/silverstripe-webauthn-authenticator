@@ -45,6 +45,8 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
 
     public function get(string $credentialId): AttestedCredentialData
     {
+        $this->assertCredentialID($credentialId);
+
         return $this->findOneByCredentialId($credentialId)->getAttestedCredentialData();
     }
 
