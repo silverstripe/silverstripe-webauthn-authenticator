@@ -17,11 +17,13 @@ use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class VerifyHandler extends SS_Object implements VerifyHandlerInterface
 {
     use BaseHandlerTrait;
+    use CredentialRepositoryProviderTrait;
 
     /**
      * Stores any data required to handle a log in process with a method, and returns relevant state to be applied to
@@ -34,7 +36,7 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
     public function start(StoreInterface $store, RegisteredMethod $method): array
     {
         return [
-            'publicKey' => $this->getCredentialRequestOptions($store, $method, true),
+            'publicKey' => $this->getCredentialRequestOptions($store, true),
         ];
     }
 
@@ -71,11 +73,11 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
             // Create a PSR-7 request
             $psrRequest = ServerRequest::fromGlobals();
 
-            $this->getAuthenticatorAssertionResponseValidator($decoder, $store, $registeredMethod)
+            $this->getAuthenticatorAssertionResponseValidator($decoder, $store)
                 ->check(
                     $publicKeyCredential->getRawId(),
                     $response,
-                    $this->getCredentialRequestOptions($store, $registeredMethod),
+                    $this->getCredentialRequestOptions($store),
                     $psrRequest,
                     (string) $store->getMember()->ID
                 );
@@ -106,7 +108,6 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
      */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
-        RegisteredMethod $registeredMethod,
         $reset = false
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
@@ -115,19 +116,24 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
             return PublicKeyCredentialRequestOptions::createFromArray($state['credentialOptions']);
         }
 
-        $data = json_decode((string) $registeredMethod->Data, true) ?? [];
-        $descriptor = PublicKeyCredentialDescriptor::createFromArray($data['descriptor'] ?? []);
+        // Use the interface methods (despite the fact the "repository" is per-member in this module)
+        $validCredentials = $this->getCredentialRepository($store)
+            ->findAllForUserEntity($this->getUserEntity($store->getMember()));
+
+        $descriptors = array_map(function(PublicKeyCredentialSource $source) {
+            return $source->getPublicKeyCredentialDescriptor();
+        }, $validCredentials);
 
         $options = new PublicKeyCredentialRequestOptions(
             random_bytes(32),
             40000,
             null,
-            [$descriptor],
+            $descriptors,
             PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED
         );
 
-        $state['credentialOptions'] = $options;
-        $store->setState($state);
+        // Persist the options for later
+        $store->addState(['credentialOptions' => $options]);
 
         return $options;
     }
@@ -135,18 +141,14 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
     /**
      * @param Decoder $decoder
      * @param StoreInterface $store
-     * @param RegisteredMethod $registeredMethod
      * @return AuthenticatorAssertionResponseValidator
      */
     protected function getAuthenticatorAssertionResponseValidator(
         Decoder $decoder,
-        StoreInterface $store,
-        RegisteredMethod $registeredMethod
+        StoreInterface $store
     ): AuthenticatorAssertionResponseValidator {
-        $credentialRepository = new CredentialRepository($store->getMember(), $registeredMethod);
-
         return new AuthenticatorAssertionResponseValidator(
-            $credentialRepository,
+            $this->getCredentialRepository($store),
             $decoder,
             new TokenBindingNotSupportedHandler(),
             new ExtensionOutputCheckerHandler()

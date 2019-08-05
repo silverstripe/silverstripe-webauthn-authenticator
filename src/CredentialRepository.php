@@ -3,99 +3,192 @@
 namespace SilverStripe\WebAuthn;
 
 use InvalidArgumentException;
-use Member;
-use MFARegisteredMethod as RegisteredMethod;
-use TypeError;
+use Serializable;
 use Webauthn\AttestedCredentialData;
-use Webauthn\CredentialRepository as CredentialRepositoryInterface;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialSourceRepository;
+use Webauthn\PublicKeyCredentialUserEntity;
 
 /**
  * This interface is required by the WebAuthn library but is too exhaustive for our "one security key per person"
  * registration. We only support one and it's stored on the RegisteredMethod that is a dependency of the constructor
  */
-class CredentialRepository implements CredentialRepositoryInterface
+class CredentialRepository implements PublicKeyCredentialSourceRepository, Serializable
 {
     /**
-     * @var RegisteredMethod
+     * @var string
      */
-    protected $registeredMethod;
+    private $memberID;
 
     /**
-     * @var Member
+     * @var array
      */
-    protected $member;
+    private $credentials = [];
 
     /**
-     * CredentialRepository constructor.
-     * @param Member $member
-     * @param RegisteredMethod $registeredMethod
+     * @var bool
      */
-    public function __construct(Member $member, RegisteredMethod $registeredMethod = null)
+    private $hasChanged = false;
+
+    /**
+     * @param string $memberID
+     */
+    public function __construct(string $memberID)
     {
-        $this->member = $member;
-        $this->registeredMethod = $registeredMethod;
+        $this->memberID = $memberID;
     }
 
     public function has(string $credentialId): bool
     {
-        $data = $this->getCredentialData()['data'] ?? [];
-
-        return isset($data['credentialId']) && $data['credentialId'] === base64_encode($credentialId);
+        return $this->findOneByCredentialId($credentialId) !== null;
     }
 
     public function get(string $credentialId): AttestedCredentialData
     {
-        $this->assertCredentialID($credentialId);
-
-        $data = $this->getCredentialData();
-
-        return AttestedCredentialData::createFromArray($data['data']);
+        return $this->findOneByCredentialId($credentialId)->getAttestedCredentialData();
     }
 
     public function getUserHandleFor(string $credentialId): string
     {
         $this->assertCredentialID($credentialId);
 
-        return (string) $this->member->ID;
+        return $this->memberID;
     }
 
     public function getCounterFor(string $credentialId): int
     {
         $this->assertCredentialID($credentialId);
 
-        return (int) $this->getCredentialData()['counter'];
+        return (int) $this->credentials[$this->getCredentialIDRef($credentialId)]['counter'];
     }
 
     public function updateCounterFor(string $credentialId, int $newCounter): void
     {
         $this->assertCredentialID($credentialId);
 
-        $this->registeredMethod->Data = json_encode([
-            'counter' => $newCounter,
-        ] + $this->getCredentialData());
-        $this->registeredMethod->write();
-    }
-
-    protected function getCredentialData(): array
-    {
-        if (!$this->registeredMethod) {
-            return [];
-        }
-
-        try {
-            return json_decode($this->registeredMethod->Data, true);
-        } catch (TypeError $error) {
-            return [];
-        }
+        $this->credentials[$this->getCredentialIDRef($credentialId)]['counter'] = $newCounter;
+        $this->hasChanged = true;
     }
 
     /**
+     * Assert that the given credential ID matches a stored credential
+     *
      * @param string $credentialId
      */
     protected function assertCredentialID(string $credentialId): void
     {
         if (!$this->has($credentialId)) {
-            throw new InvalidArgumentException('Given credential ID does not match any database record');
+            throw new InvalidArgumentException('Given credential ID does not match any stored credentials');
         }
+    }
+
+    public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    {
+        $ref = $this->getCredentialIDRef($publicKeyCredentialId);
+        if (!isset($this->credentials[$ref])) {
+            return null;
+        }
+
+        return $this->credentials[$ref]['source'];
+    }
+
+    /**
+     * @return PublicKeyCredentialSource[]
+     */
+    public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
+    {
+        // Only return credentials if the user entity shares the same ID.
+        if ($publicKeyCredentialUserEntity->getId() !== $this->memberID) {
+            return [];
+        }
+
+        return array_map(function($credentialComposite) {
+            return $credentialComposite['source'];
+        }, $this->credentials);
+    }
+
+    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
+    {
+        $ref = $this->getCredentialIDRef($publicKeyCredentialSource->getPublicKeyCredentialId());
+
+        if (!isset($this->credentials[$ref])) {
+            $this->credentials[$ref] = [
+                'counter' => 0,
+            ];
+        }
+
+        $this->credentials[$ref]['source'] = $publicKeyCredentialSource;
+        $this->hasChanged = true;
+    }
+
+    public function hasChanged(): bool
+    {
+        return $this->hasChanged;
+    }
+
+    protected function setCredentials(array $credentials): void
+    {
+        $this->credentials = array_map(function ($data) {
+            $data['source'] = PublicKeyCredentialSource::createFromArray($data['source']);
+            return $data;
+        }, $credentials);
+    }
+
+    protected function getCredentialIDRef(string $credentialID): string
+    {
+        return base64_encode($credentialID);
+    }
+
+    /**
+     * Provide the credentials stored in this repository as an array
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->credentials;
+    }
+
+    /**
+     * Create an instance of a repository from the given credentials
+     *
+     * @param array $credentials
+     * @param string $memberID
+     * @return CredentialRepository
+     */
+    public static function fromArray(array $credentials, string $memberID)
+    {
+        $new = new static($memberID);
+        $new->setCredentials($credentials);
+
+        return $new;
+    }
+
+    /**
+     * String representation of object
+     * @link https://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return json_encode(['credentials' => $this->toArray(), 'memberID' => $this->memberID]);
+    }
+
+    /**
+     * Constructs the object
+     * @link https://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        $raw = json_decode($serialized, true);
+
+        $this->memberID = $raw['memberID'];
+        $this->setCredentials($raw['credentials']);
     }
 }
