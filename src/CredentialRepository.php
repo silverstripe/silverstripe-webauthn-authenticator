@@ -10,8 +10,10 @@ use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 /**
- * This interface is required by the WebAuthn library but is too exhaustive for our "one security key per person"
- * registration. We only support one and it's stored on the RegisteredMethod that is a dependency of the constructor
+ * Implements the required interface from the WebAuthn library - but it does not implement the repository pattern in the
+ * usual way. This is expected to be stored on a DataObject for persistence. Use the
+ * @see CredentialRepository::hasChanged() API for determining whether a DataObject this is stored upon should be
+ * persisted.
  */
 class CredentialRepository implements PublicKeyCredentialSourceRepository, Serializable
 {
@@ -123,11 +125,22 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
         $this->hasChanged = true;
     }
 
+    /**
+     * Indicates the repository has changed and should be persisted (as this doesn't follow the actual repository
+     * pattern and is expected to be stored on a dataobject for persistence)
+     *
+     * @return bool
+     */
     public function hasChanged(): bool
     {
         return $this->hasChanged;
     }
 
+    /**
+     * Set the credentials in bulk (for internal use) ensuring that credential objects are initialised correctly
+     *
+     * @param array $credentials
+     */
     protected function setCredentials(array $credentials): void
     {
         $this->credentials = array_map(function ($data) {
@@ -136,6 +149,12 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
         }, $credentials);
     }
 
+    /**
+     * Create a reference to be used as a key for the credentials in the array
+     *
+     * @param string $credentialID
+     * @return string
+     */
     protected function getCredentialIDRef(string $credentialID): string
     {
         return base64_encode($credentialID);
@@ -158,7 +177,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
      * @param string $memberID
      * @return CredentialRepository
      */
-    public static function fromArray(array $credentials, string $memberID)
+    public static function fromArray(array $credentials, string $memberID): self
     {
         $new = new static($memberID);
         $new->setCredentials($credentials);
