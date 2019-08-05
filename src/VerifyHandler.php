@@ -5,8 +5,10 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\MFA\Exception\AuthenticationFailedException;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\State\Result;
@@ -62,7 +64,7 @@ class VerifyHandler implements VerifyHandlerInterface
     public function start(StoreInterface $store, RegisteredMethod $method): array
     {
         return [
-            'publicKey' => $this->getCredentialRequestOptions($store, true),
+            'publicKey' => $this->getCredentialRequestOptions($store, $method, true),
         ];
     }
 
@@ -103,7 +105,7 @@ class VerifyHandler implements VerifyHandlerInterface
                 ->check(
                     $publicKeyCredential->getRawId(),
                     $response,
-                    $this->getCredentialRequestOptions($store),
+                    $this->getCredentialRequestOptions($store, $registeredMethod),
                     $psrRequest,
                     (string) $store->getMember()->ID
                 );
@@ -134,6 +136,7 @@ class VerifyHandler implements VerifyHandlerInterface
      */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
+        RegisteredMethod $registeredMethod = null,
         $reset = false
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
@@ -143,8 +146,12 @@ class VerifyHandler implements VerifyHandlerInterface
         }
 
         // Use the interface methods (despite the fact the "repository" is per-member in this module)
-        $validCredentials = $this->getCredentialRepository($store)
+        $validCredentials = $this->getCredentialRepository($store, $registeredMethod)
             ->findAllForUserEntity($this->getUserEntity($store->getMember()));
+
+        if (!count($validCredentials)) {
+            throw new AuthenticationFailedException('User does not appear to have any credentials loaded for webauthn');
+        }
 
         $descriptors = array_map(function(PublicKeyCredentialSource $source) {
             return $source->getPublicKeyCredentialDescriptor();

@@ -4,98 +4,84 @@ namespace SilverStripe\WebAuthn\Tests;
 
 use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\MFA\Model\RegisteredMethod;
-use SilverStripe\Security\Member;
 use SilverStripe\WebAuthn\CredentialRepository;
 use Webauthn\AttestedCredentialData;
 
 class CredentialRepositoryTest extends SapphireTest
 {
-    protected $usesDatabase = true;
-
-    /**
-     * @var Member
-     */
-    protected $member;
-
-    /**
-     * @var RegisteredMethod
-     */
-    protected $registeredMethod;
-
-    /**
-     * @var CredentialRepository
-     */
-    protected $repository;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->member = new Member();
-        $this->registeredMethod = new RegisteredMethod();
-        $this->repository = new CredentialRepository($this->member, $this->registeredMethod);
-    }
-
     public function testHas()
     {
-        $this->registeredMethod->Data = json_encode([
-            'data' => ['credentialId' => base64_encode('foobar')],
-        ]);
+        $repo = CredentialRepository::fromArray($this->createTestCredentials(['foobar']), '1');
 
-        $this->assertTrue($this->repository->has('foobar'));
-        $this->assertFalse($this->repository->has('barbaz'));
+        $this->assertTrue($repo->has('foobar'));
+        $this->assertFalse($repo->has('barbaz'));
     }
 
     /**
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Given credential ID does not match any database record
+     * @expectedExceptionMessage Given credential ID does not match any stored credentials
      */
     public function testGetThrowsExceptionOnInvalidCredentialId()
     {
-        $this->repository->get('non-existent');
+        $repo = new CredentialRepository('1');
+        $repo->get('non-existent');
     }
 
     public function testGetReturnsAttestedCredentialData()
     {
-        $this->registeredMethod->Data = json_encode([
-            'data' => [
-                'credentialId' => base64_encode('foobar'),
-                'aaguid' => base64_encode('1234-5678-9012-3456'),
-            ],
-        ]);
+        $repo = CredentialRepository::fromArray($this->createTestCredentials(['foobar']), '1');
 
-        $this->assertInstanceOf(AttestedCredentialData::class, $this->repository->get('foobar'));
+        $this->assertInstanceOf(AttestedCredentialData::class, $repo->get('foobar'));
     }
 
     public function testGetUserHandleFor()
     {
-        $this->registeredMethod->Data = json_encode([
-            'data' => ['credentialId' => base64_encode('foobar')],
-        ]);
-        $this->member->ID = 123;
+        $repo = CredentialRepository::fromArray($this->createTestCredentials(['foobar']), '123');
 
-        $this->assertSame('123', $this->repository->getUserHandleFor('foobar'));
+        $this->assertSame('123', $repo->getUserHandleFor('foobar'));
     }
 
     public function testGetCounterFor()
     {
-        $this->registeredMethod->Data = json_encode([
-            'data' => ['credentialId' => base64_encode('foobar')],
-            'counter' => 5,
-        ]);
+        $repo = CredentialRepository::fromArray($this->createTestCredentials(['foobar'], 5), '1');
 
-        $this->assertSame(5, $this->repository->getCounterFor('foobar'));
+        $this->assertSame(5, $repo->getCounterFor('foobar'));
     }
 
     public function testUpdateCounterFor()
     {
-        $this->registeredMethod->Data = json_encode([
-            'data' => ['credentialId' => base64_encode('foobar')],
-            'counter' => 5,
-        ]);
+        $repo = CredentialRepository::fromArray($this->createTestCredentials(['foobar']), '1');
 
-        $this->repository->updateCounterFor('foobar', 10);
-        $this->assertSame(10, $this->repository->getCounterFor('foobar'));
+        $repo->updateCounterFor('foobar', 10);
+        $this->assertSame(10, $repo->getCounterFor('foobar'));
+    }
+
+    protected function createTestCredentials(array $names, $counterValue = 1)
+    {
+        $creds = [];
+
+        foreach ($names as $id) {
+            $creds[base64_encode($id)] = [
+                'source' => [
+                    'publicKeyCredentialId' => $id,
+                    'type' => 'public-key',
+                    'transports' =>
+                        array (
+                        ),
+                    'attestationType' => 'none',
+                    'trustPath' =>
+                        array (
+                            'type' => 'empty',
+                        ),
+                    'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
+                    'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
+                    'userHandle' => 'MQ',
+                    'counter' => 268,
+                ],
+                'counter' => $counterValue,
+            ];
+        }
+
+        return $creds;
     }
 }

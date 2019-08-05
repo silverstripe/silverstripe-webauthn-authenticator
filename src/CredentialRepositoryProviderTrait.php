@@ -2,6 +2,7 @@
 
 namespace SilverStripe\WebAuthn;
 
+use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\Service\RegisteredMethodManager;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\Security\Member;
@@ -11,10 +12,13 @@ trait CredentialRepositoryProviderTrait
 {
     /**
      * @param StoreInterface $store
+     * @param RegisteredMethod|null $registeredMethod
      * @return CredentialRepository
      */
-    protected function getCredentialRepository(StoreInterface $store): CredentialRepository
-    {
+    protected function getCredentialRepository(
+        StoreInterface $store,
+        RegisteredMethod $registeredMethod = null
+    ): CredentialRepository {
         $state = $store->getState();
 
         // Check state from the store (session)
@@ -24,15 +28,17 @@ trait CredentialRepositoryProviderTrait
 
         // Check if the member has an existing webauthn registered method to add to
         $member = $store->getMember();
-        $method = RegisteredMethodManager::singleton()->getFromMember(
-            $member,
-            new Method()
-        );
+        if (!$registeredMethod) {
+            $registeredMethod = RegisteredMethodManager::singleton()->getFromMember(
+                $member,
+                new Method()
+            );
+        }
 
-        if ($method) {
+        if ($registeredMethod) {
             // Unserialize is used here but it the class implements `Serializable` to serialise as JSON.
             $credentialRepository = CredentialRepository::fromArray(
-                json_decode($method->Data, true),
+                (array) json_decode($registeredMethod->Data, true),
                 (string) $store->getMember()->ID
             );
         } else {

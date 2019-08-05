@@ -13,6 +13,7 @@ use SilverStripe\MFA\Store\SessionStore;
 use SilverStripe\Security\Member;
 use SilverStripe\WebAuthn\RegisterHandler;
 use Webauthn\AttestationStatement\AttestationObject;
+use Webauthn\AttestedCredentialData;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
@@ -22,6 +23,7 @@ use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialSource;
 
 class RegisterHandlerTest extends SapphireTest
 {
@@ -189,7 +191,7 @@ class RegisterHandlerTest extends SapphireTest
             $publicKeyCredentialMock
         );
 
-        $publicKeyCredentialMock->expects($this->once())->method('getResponse')->willReturn($mockResponse);
+        $publicKeyCredentialMock->expects($this->any())->method('getResponse')->willReturn($mockResponse);
 
         $this->request->setBody(json_encode([
             'credentials' => base64_encode('example'),
@@ -211,11 +213,29 @@ class RegisterHandlerTest extends SapphireTest
      */
     public function registerProvider()
     {
+        $testSource = PublicKeyCredentialSource::createFromArray([
+            'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW6B-p7xB2tqj28svkJQh1Q',
+            'type' => 'public-key',
+            'transports' => [],
+            'attestationType' => 'none',
+            'trustPath' => [
+                'type' => 'empty',
+            ],
+            'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
+            'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
+            'userHandle' => 'MQ',
+            'counter' => 268,
+        ]);
+
         $authDataMock = $this->createMock(AuthenticatorData::class);
         $authDataMock->expects($this->exactly(3))->method('hasAttestedCredentialData')
             // The first call is the "response indicates incomplete data" test case, second is "valid response",
             // third is "invalid response"
             ->willReturnOnConsecutiveCalls(false, true, true);
+        $authDataMock->expects($this->any())->method('getAttestedCredentialData')->willReturn(
+            $testSource->getAttestedCredentialData()
+        );
+        $authDataMock->expects($this->any())->method('getSignCount')->willReturn(1);
 
         $attestationMock = $this->createMock(AttestationObject::class);
         $attestationMock->expects($this->any())->method('getAuthData')->willReturn($authDataMock);
