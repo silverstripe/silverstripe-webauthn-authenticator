@@ -101,9 +101,10 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
 
     /**
      * @param StoreInterface $store
-     * @param RegisteredMethod $registeredMethod
+     * @param RegisteredMethod|null $registeredMethod
      * @param bool $reset
      * @return PublicKeyCredentialRequestOptions
+     * @throws AuthenticationFailedException
      * @throws Exception
      */
     protected function getCredentialRequestOptions(
@@ -125,7 +126,7 @@ class VerifyHandler extends SS_Object implements VerifyHandlerInterface
             throw new AuthenticationFailedException('User does not appear to have any credentials loaded for webauthn');
         }
 
-        $descriptors = array_map(function(PublicKeyCredentialSource $source) {
+        $descriptors = array_map(function (PublicKeyCredentialSource $source) {
             return $source->getPublicKeyCredentialDescriptor();
         }, $validCredentials);
 

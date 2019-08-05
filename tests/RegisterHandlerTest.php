@@ -211,6 +211,7 @@ class RegisterHandlerTest extends SapphireTest
      */
     public function registerProvider()
     {
+        // phpcs:disable
         $testSource = PublicKeyCredentialSource::createFromArray([
             'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW6B-p7xB2tqj28svkJQh1Q',
             'type' => 'public-key',
@@ -224,6 +225,7 @@ class RegisterHandlerTest extends SapphireTest
             'userHandle' => 'MQ',
             'counter' => 268,
         ]);
+        // phpcs:enable
 
         $authDataMock = $this->createMock(AuthenticatorData::class);
         $authDataMock->expects($this->exactly(3))->method('hasAttestedCredentialData')

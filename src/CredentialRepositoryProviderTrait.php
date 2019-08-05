@@ -36,13 +36,12 @@ trait CredentialRepositoryProviderTrait
         }
 
         if ($registeredMethod) {
-            // Unserialize is used here but it the class implements `Serializable` to serialise as JSON.
             $credentialRepository = CredentialRepository::fromArray(
                 (array) json_decode($registeredMethod->Data, true),
-                (string) $store->getMember()->ID
+                (string) $member->ID
             );
         } else {
-            $credentialRepository = new CredentialRepository((string)$member->ID);
+            $credentialRepository = new CredentialRepository((string) $member->ID);
         }
 
         // Persist the credential repository in the store

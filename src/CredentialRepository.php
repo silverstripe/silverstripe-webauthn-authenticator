@@ -106,7 +106,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
             return [];
         }
 
-        return array_map(function($credentialComposite) {
+        return array_map(function ($credentialComposite) {
             return $credentialComposite['source'];
         }, $this->credentials);
     }
@@ -123,6 +123,14 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
 
         $this->credentials[$ref]['source'] = $publicKeyCredentialSource;
         $this->hasChanged = true;
+    }
+
+    /**
+     * Empty the store deleting all stored credentials
+     */
+    public function reset(): void
+    {
+        $this->credentials = [];
     }
 
     /**
@@ -185,26 +193,11 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
         return $new;
     }
 
-    /**
-     * String representation of object
-     * @link https://php.net/manual/en/serializable.serialize.php
-     * @return string the string representation of the object or null
-     * @since 5.1.0
-     */
     public function serialize()
     {
         return json_encode(['credentials' => $this->toArray(), 'memberID' => $this->memberID]);
     }
 
-    /**
-     * Constructs the object
-     * @link https://php.net/manual/en/serializable.unserialize.php
-     * @param string $serialized <p>
-     * The string representation of the object.
-     * </p>
-     * @return void
-     * @since 5.1.0
-     */
     public function unserialize($serialized)
     {
         $raw = json_decode($serialized, true);

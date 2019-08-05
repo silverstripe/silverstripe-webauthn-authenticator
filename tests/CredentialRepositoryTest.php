@@ -61,6 +61,7 @@ class CredentialRepositoryTest extends SapphireTest
         $creds = [];
 
         foreach ($names as $id) {
+            // phpcs:disable
             $creds[base64_encode($id)] = [
                 'source' => [
                     'publicKeyCredentialId' => $id,
@@ -68,18 +69,19 @@ class CredentialRepositoryTest extends SapphireTest
                     'transports' =>
                         array (
                         ),
-                    'attestationType' => 'none',
-                    'trustPath' =>
+                        'attestationType' => 'none',
+                        'trustPath' =>
                         array (
                             'type' => 'empty',
                         ),
-                    'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
-                    'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
-                    'userHandle' => 'MQ',
-                    'counter' => 268,
+                        'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
+                        'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
+                        'userHandle' => 'MQ',
+                        'counter' => 268,
                 ],
                 'counter' => $counterValue,
             ];
+            // phpcs:enable
         }
 
         return $creds;
