@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { performRegistration } from 'lib/auth';
+import classNames from 'classnames';
 
 import CircleTick from 'components/Icons/CircleTick';
 import CircleWarning from 'components/Icons/CircleWarning';
@@ -286,14 +287,18 @@ class Register extends Component {
     }
 
     return (
-      <div className="mfa-registration-container__actions">
+      <div className="mfa-registration-container__actions mfa-action-list">
         {
           actions.map((action, i) => {
             const firstAction = i === 0;
+            const className = classNames('btn', 'mfa-action-list__item', {
+              'btn-primary': firstAction,
+              'btn-secondary': !firstAction,
+            });
             return (
               <button
                 key={action.name}
-                className={firstAction ? 'btn btn-primary' : 'btn btn-secondary'}
+                className={className}
                 disabled={action.disabled || false}
                 onClick={action.action}
                 type="button"
