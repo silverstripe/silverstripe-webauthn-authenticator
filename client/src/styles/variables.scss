@@ -1,5 +1,8 @@
-$color-status-icon: rgba(0, 113, 196, 1); // $color-blue from mfa module
-$color-status-bad: rgba(169, 30, 46, 1); // $color-message-error from mfa module
+$color-status-good: rgb(0, 113, 196); // $color-blue from mfa module
+$color-status-bad: rgb(169, 30, 46); // $color-message-error from mfa module
+
+$dark-color-status-good: rgb(74, 144, 226); // $dark-color-blue from mfa module
+$dark-color-status-bad: rgb(218, 39, 59); // $dark-color-message-error from mfa module
 
 $padding-thumbnail: 20px;
 $sizing-thumbnail: 260px;
@@ -14,3 +17,13 @@ $grid-row-actions: 3;
 $grid-row-thumbnail: 1 / span 2;
 
 $mobile-breakpoint: 420px;
+
+:root {
+  --color-status-good: $color-status-good;
+  --color-status-bad: $color-status-bad;
+
+  @media (prefers-color-scheme: dark) {
+    --color-status-good: $dark-color-status-good;
+    --color-status-bad: $dark-color-status-bad;
+  }
+}
