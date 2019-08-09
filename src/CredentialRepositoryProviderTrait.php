@@ -2,7 +2,7 @@
 
 namespace SilverStripe\WebAuthn;
 
-use SilverStripe\MFA\Model\RegisteredMethod;
+use MFARegisteredMethod as RegisteredMethod;
 use SilverStripe\MFA\Service\RegisteredMethodManager;
 use SilverStripe\MFA\Store\StoreInterface;
 use Member;
