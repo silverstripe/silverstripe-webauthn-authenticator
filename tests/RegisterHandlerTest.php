@@ -11,6 +11,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\SessionStore;
 use SilverStripe\Security\Member;
+use SilverStripe\WebAuthn\CredentialRepository;
 use SilverStripe\WebAuthn\RegisterHandler;
 use Webauthn\AttestationStatement\AttestationObject;
 use Webauthn\AttestedCredentialData;
@@ -162,11 +163,18 @@ class RegisterHandlerTest extends SapphireTest
     /**
      * @param AuthenticatorResponse $mockResponse
      * @param Result $expectedResult
+     * @param int $expectedCredentialCount
      * @param callable $responseValidatorMockCallback
+     * @throws Exception
      * @dataProvider registerProvider
      */
-    public function testRegister($mockResponse, $expectedResult, callable $responseValidatorMockCallback = null)
-    {
+    public function testRegister(
+        $mockResponse,
+        $expectedResult,
+        $expectedCredentialCount,
+        callable $responseValidatorMockCallback = null,
+        callable $storeModifier = null
+    ) {
         /** @var RegisterHandler&PHPUnit_Framework_MockObject_MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(RegisterHandler::class)
             ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAttestationResponseValidator'])
@@ -197,12 +205,22 @@ class RegisterHandlerTest extends SapphireTest
             'credentials' => base64_encode('example'),
         ]));
 
+        if ($storeModifier) {
+            $storeModifier($this->store);
+        }
+
         $result = $handlerMock->register($this->request, $this->store);
 
         $this->assertSame($expectedResult->isSuccessful(), $result->isSuccessful());
         if ($expectedResult->getMessage()) {
             $this->assertContains($expectedResult->getMessage(), $result->getMessage());
         }
+
+        $this->assertCount(
+            $expectedCredentialCount,
+            $result->getContext(),
+            'The number of credentials stored is expected'
+        );
     }
 
     /**
@@ -230,10 +248,10 @@ class RegisterHandlerTest extends SapphireTest
         // phpcs:enable
 
         $authDataMock = $this->createMock(AuthenticatorData::class);
-        $authDataMock->expects($this->exactly(3))->method('hasAttestedCredentialData')
+        $authDataMock->expects($this->exactly(4))->method('hasAttestedCredentialData')
             // The first call is the "response indicates incomplete data" test case, second is "valid response",
             // third is "invalid response"
-            ->willReturnOnConsecutiveCalls(false, true, true);
+            ->willReturnOnConsecutiveCalls(false, true, true, true);
         $authDataMock->expects($this->any())->method('getAttestedCredentialData')->willReturn(
             $testSource->getAttestedCredentialData()
         );
@@ -250,22 +268,54 @@ class RegisterHandlerTest extends SapphireTest
                 // Deliberately the wrong child implementation of \Webauthn\AuthenticatorResponse
                 $this->createMock(AuthenticatorAssertionResponse::class),
                 new Result(false, 'Unexpected response type found'),
+                0,
             ],
             'response indicates incomplete data' => [
                 $responseMock,
                 new Result(false, 'Incomplete data, required information missing'),
+                0,
             ],
             'valid response' => [
                 $responseMock,
                 new Result(true),
+                1,
                 function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock->expects($this->once())->method('check')->willReturn(true);
                 },
             ],
+            'valid response with existing credential' => [
+                $responseMock,
+                new Result(true),
+                1,
+                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                    // Specifically setting expectations for the result of the response validator's "check" call
+                    $responseValidatorMock->expects($this->once())->method('check')->willReturn(true);
+                },
+                function (SessionStore $store) use ($testSource) {
+                    $repo = new CredentialRepository((string) $store->getMember()->ID);
+                    // phpcs:disable
+                    $repo->saveCredentialSource(PublicKeyCredentialSource::createFromArray([
+                        'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW245125129518925891',
+                        'type' => 'public-key',
+                        'transports' => [],
+                        'attestationType' => 'none',
+                        'trustPath' => [
+                            'type' => 'empty',
+                        ],
+                        'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
+                        'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
+                        'userHandle' => 'MQ',
+                        'counter' => 268,
+                    ]));
+                    // phpcs:enable
+                    $store->addState(['repository' => $repo]);
+                },
+            ],
             'invalid response' => [
                 $responseMock,
                 new Result(false, 'I am a test'),
+                0,
                 function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock->expects($this->once())->method('check')
