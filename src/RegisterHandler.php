@@ -11,6 +11,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\MFA\Method\Handler\RegisterHandlerInterface;
+use SilverStripe\MFA\Service\RegisteredMethodManager;
 use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\Security\Member;
@@ -24,6 +25,7 @@ use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialRpEntity;
+use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
@@ -32,6 +34,7 @@ class RegisterHandler implements RegisterHandlerInterface
     use BaseHandlerTrait;
     use Extensible;
     use Configurable;
+    use CredentialRepositoryProviderTrait;
 
     /**
      * Provide a user help link that will be available when registering backup codes
@@ -139,11 +142,21 @@ class RegisterHandler implements RegisterHandlerInterface
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
         }
 
-        return Result::create()->setContext([
-            'descriptor' => $publicKeyCredential->getPublicKeyCredentialDescriptor(),
-            'data' => $response->getAttestationObject()->getAuthData()->getAttestedCredentialData(),
-            'counter' => null,
-        ]);
+        $credentialRepository = $this->getCredentialRepository($store);
+
+        $source = PublicKeyCredentialSource::createFromPublicKeyCredential(
+            $publicKeyCredential,
+            $options->getUser()->getId()
+        );
+
+        // Clear the repository so only one key is registered at a time
+        // NOTE: This can be considered temporary behaviour until the UI supports managing multiple keys
+        $credentialRepository->reset();
+
+        // Persist the "credential source"
+        $credentialRepository->saveCredentialSource($source);
+
+        return Result::create()->setContext($credentialRepository->toArray());
     }
 
     /**
@@ -155,7 +168,7 @@ class RegisterHandler implements RegisterHandlerInterface
         AttestationStatementSupportManager $attestationStatementSupportManager,
         StoreInterface $store
     ): AuthenticatorAttestationResponseValidator {
-        $credentialRepository = new CredentialRepository($store->getMember());
+        $credentialRepository = $this->getCredentialRepository($store);
 
         return new AuthenticatorAttestationResponseValidator(
             $attestationStatementSupportManager,
@@ -187,7 +200,7 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     public function getSupportLink(): string
     {
-        return static::config()->get('user_help_link') ?: '';
+        return $this->config()->get('user_help_link') ?: '';
     }
 
     /**
@@ -223,19 +236,6 @@ class RegisterHandler implements RegisterHandlerInterface
             (string) SiteConfig::current_site_config()->Title,
             $host,
             static::config()->get('application_logo')
-        );
-    }
-
-    /**
-     * @param Member $member
-     * @return PublicKeyCredentialUserEntity
-     */
-    protected function getUserEntity(Member $member): PublicKeyCredentialUserEntity
-    {
-        return new PublicKeyCredentialUserEntity(
-            $member->getName(),
-            (string) $member->ID,
-            $member->getName()
         );
     }
 

@@ -5,8 +5,10 @@ namespace SilverStripe\WebAuthn;
 use CBOR\Decoder;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\MFA\Exception\AuthenticationFailedException;
 use SilverStripe\MFA\Method\Handler\VerifyHandlerInterface;
 use SilverStripe\MFA\Model\RegisteredMethod;
 use SilverStripe\MFA\State\Result;
@@ -16,11 +18,13 @@ use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
+use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class VerifyHandler implements VerifyHandlerInterface
 {
     use BaseHandlerTrait;
+    use CredentialRepositoryProviderTrait;
 
     /**
      * Dependency injection configuration
@@ -97,7 +101,7 @@ class VerifyHandler implements VerifyHandlerInterface
             // Create a PSR-7 request
             $psrRequest = ServerRequest::fromGlobals();
 
-            $this->getAuthenticatorAssertionResponseValidator($decoder, $store, $registeredMethod)
+            $this->getAuthenticatorAssertionResponseValidator($decoder, $store)
                 ->check(
                     $publicKeyCredential->getRawId(),
                     $response,
@@ -125,14 +129,15 @@ class VerifyHandler implements VerifyHandlerInterface
 
     /**
      * @param StoreInterface $store
-     * @param RegisteredMethod $registeredMethod
+     * @param RegisteredMethod|null $registeredMethod
      * @param bool $reset
      * @return PublicKeyCredentialRequestOptions
+     * @throws AuthenticationFailedException
      * @throws Exception
      */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
-        RegisteredMethod $registeredMethod,
+        RegisteredMethod $registeredMethod = null,
         $reset = false
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
@@ -141,19 +146,28 @@ class VerifyHandler implements VerifyHandlerInterface
             return PublicKeyCredentialRequestOptions::createFromArray($state['credentialOptions']);
         }
 
-        $data = json_decode((string) $registeredMethod->Data, true) ?? [];
-        $descriptor = PublicKeyCredentialDescriptor::createFromArray($data['descriptor'] ?? []);
+        // Use the interface methods (despite the fact the "repository" is per-member in this module)
+        $validCredentials = $this->getCredentialRepository($store, $registeredMethod)
+            ->findAllForUserEntity($this->getUserEntity($store->getMember()));
+
+        if (!count($validCredentials)) {
+            throw new AuthenticationFailedException('User does not appear to have any credentials loaded for webauthn');
+        }
+
+        $descriptors = array_map(function (PublicKeyCredentialSource $source) {
+            return $source->getPublicKeyCredentialDescriptor();
+        }, $validCredentials);
 
         $options = new PublicKeyCredentialRequestOptions(
             random_bytes(32),
             40000,
             null,
-            [$descriptor],
+            $descriptors,
             PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED
         );
 
-        $state['credentialOptions'] = $options;
-        $store->setState($state);
+        // Persist the options for later
+        $store->addState(['credentialOptions' => $options]);
 
         return $options;
     }
@@ -161,18 +175,14 @@ class VerifyHandler implements VerifyHandlerInterface
     /**
      * @param Decoder $decoder
      * @param StoreInterface $store
-     * @param RegisteredMethod $registeredMethod
      * @return AuthenticatorAssertionResponseValidator
      */
     protected function getAuthenticatorAssertionResponseValidator(
         Decoder $decoder,
-        StoreInterface $store,
-        RegisteredMethod $registeredMethod
+        StoreInterface $store
     ): AuthenticatorAssertionResponseValidator {
-        $credentialRepository = new CredentialRepository($store->getMember(), $registeredMethod);
-
         return new AuthenticatorAssertionResponseValidator(
-            $credentialRepository,
+            $this->getCredentialRepository($store),
             $decoder,
             new TokenBindingNotSupportedHandler(),
             new ExtensionOutputCheckerHandler()
