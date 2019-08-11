@@ -17,7 +17,7 @@
 }
 
 .status-message__icon {
-  color: $color-status-icon;
+  color: var(--color-status-good);
 }
 
 .status-message__description {
@@ -25,10 +25,10 @@
 }
 
 .status-message--error {
-  color: $color-status-bad;
+  color: var(--color-status-bad);
 
   .status-message__icon {
-    color: $color-status-bad;
+    color: var(--color-status-bad);
   }
 }
 

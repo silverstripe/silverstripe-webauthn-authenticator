@@ -21,7 +21,7 @@
 }
 
 .status-message__icon {
-  color: $color-status-icon;
+  color: var(--color-status-good);
 }
 
 .status-message__description {
