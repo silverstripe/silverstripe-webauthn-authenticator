@@ -58,8 +58,7 @@ class Method implements MethodInterface
      */
     public function getThumbnail(): string
     {
-        $module = $this->getModuleName();
-        return "/$module/client/dist/images/securityKey.svg";
+        return Director::absoluteURL($this->getModuleName() . '/client/dist/images/securityKey.svg');
     }
 
     /**
