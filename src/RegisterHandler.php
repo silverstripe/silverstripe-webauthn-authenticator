@@ -36,7 +36,9 @@ class RegisterHandler extends SS_Object implements RegisterHandlerInterface
      * @config
      * @var string
      */
-    private static $user_help_link = 'https://userhelp.silverstripe.org/en/4/optional_features/multi-factor_authentication/user_manual/using_security_keys/'; // phpcs-disable-line
+    // phpcs:disable
+    private static $user_help_link = 'https://userhelp.silverstripe.org/en/4/optional_features/multi-factor_authentication/user_manual/using_security_keys/';
+    // phpcs:enable
 
     /**
      * The default attachment mode to use for Authentication Selection Criteria.

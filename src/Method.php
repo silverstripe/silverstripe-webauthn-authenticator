@@ -58,8 +58,7 @@ class Method implements MethodInterface
      */
     public function getThumbnail(): string
     {
-        $module = $this->getModuleName();
-        return "/$module/client/dist/images/securityKey.svg";
+        return Director::absoluteURL('webauthn-authenticator/client/dist/images/securityKey.svg');
     }
 
     /**
@@ -70,9 +69,8 @@ class Method implements MethodInterface
      */
     public function applyRequirements(): void
     {
-        $moduleName = $this->getModuleName();
-        Requirements::javascript($moduleName . '/client/dist/js/bundle.js');
-        Requirements::css($moduleName . '/client/dist/styles/bundle.css');
+        Requirements::javascript('webauthn-authenticator/client/dist/js/bundle.js');
+        Requirements::css('webauthn-authenticator/client/dist/styles/bundle.css');
     }
 
     public function isAvailable(): bool
@@ -83,17 +81,5 @@ class Method implements MethodInterface
     public function getUnavailableMessage(): string
     {
         return _t(__CLASS__ . '.REQUIRES_HTTPS', 'This method can only be used over HTTPS.');
-    }
-
-    /**
-     * Get directory name this module is installed into
-     * SS3 is not specific or caring about what the module is named, only that it exists and is a valid SilverStripe
-     * mdoule.
-     *
-     * @return string
-     */
-    private function getModuleName(): string
-    {
-        return basename(realpath(__DIR__ . DIRECTORY_SEPARATOR . '..'));
     }
 }
