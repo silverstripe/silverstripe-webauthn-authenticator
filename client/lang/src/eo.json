@@ -1,0 +1,22 @@
+{
+    "MFAWebAuthnRegister.BACK": "Antaŭa",
+    "MFAWebAuthnRegister.COMPLETEREGISTRATION": "Registri",
+    "MFAWebAuthnRegister.DESCRIPTION": "Kontaktu vian administranton se vi bezonas sekurecan ŝlosilon.",
+    "MFAWebAuthnRegister.FAILURE": "Io paneis. Bonvolu re-enmeti vian ŝlosilon kaj reprovi",
+    "MFAWebAuthnRegister.HELP": "How to use security keys.",
+    "MFAWebAuthnRegister.INSTRUCTION": "Enigu sekurecan ŝlosilon kaj premu {button}",
+    "MFAWebAuthnRegister.REGISTER": "Registri ŝlosilon",
+    "MFAWebAuthnRegister.REGISTERING": "Registri",
+    "MFAWebAuthnRegister.RETRY": "Reprovi",
+    "MFAWebAuthnRegister.SUCCESS": "Aŭtentigis ŝlosilon",
+    "MFAWebAuthnRegister.WAITING": "Atendas",
+
+    "MFAWebAuthnVerify.DESCRIPTION": "Uzu viajn sekurecan ŝlosilon por aŭtentigi vin.",
+    "MFAWebAuthnVerify.FAILURE": "Io paneis. Bonvolu re-enmeti vian ŝlosilon kaj reprovi",
+    "MFAWebAuthnVerify.HELP": "Kiel uzi sekurigajn ŝlosilojn",
+    "MFAWebAuthnVerify.INSTRUCTION": "Enigu vian sekurigan ŝlosilon kaj {button}",
+    "MFAWebAuthnVerify.RETRY": "Ree provu",
+    "MFAWebAuthnVerify.SUCCESS": "Ensalutas...",
+    "MFAWebAuthnVerify.VERIFY": "aktivigi ĝin",
+    "MFAWebAuthnVerify.WAITING": "Atendas..."
+}
