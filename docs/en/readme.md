@@ -43,3 +43,11 @@ phones) are disabled. You can adjust this setting by configuring
 * `AuthenticatorSelectionCriteria::AUTHENTICATOR_ATTACHMENT_CROSS_PLATFORM `: cross-platform only
 
 For more information, see [Authenticator Selection Criteria](https://github.com/web-auth/webauthn-framework/blob/v1.2/doc/webauthn/PublicKeyCredentialCreation.md#authenticator-selection-criteria)
+
+## Compatibility with Subsites
+
+This module is not recommended for use if your project has the [silverstripe/subsites](https://github.com/silverstripe/silverstripe-subsites) module installed.
+
+The WebAuthn protocol includes security measures that will only allow the creation of a credential for per single domain or subdomain. Subsites that have a login form served over a different domain will not be compatible.
+
+This restriction is a requirement of the WebAuthn [Relying Party Entity](https://github.com/web-auth/webauthn-framework/blob/master/doc/webauthn/PublicKeyCredentialCreation.md#relying-party-entity).
