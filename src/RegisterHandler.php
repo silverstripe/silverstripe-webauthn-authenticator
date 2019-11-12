@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SilverStripe\WebAuthn;
 
@@ -42,7 +44,7 @@ class RegisterHandler implements RegisterHandlerInterface
      * @config
      * @var string
      */
-    private static $user_help_link = 'https://userhelp.silverstripe.org/en/4/optional_features/multi-factor_authentication/user_manual/using_security_keys/'; // phpcs-disable-line
+    private static $user_help_link = 'https://userhelp.silverstripe.org/en/4/optional_features/multi-factor_authentication/user_manual/using_security_keys/'; // phpcs:ignore
 
     /**
      * The default attachment mode to use for Authentication Selection Criteria.
