@@ -1,0 +1,7 @@
+nl:
+  SilverStripe\WebAuthn\Method:
+    NAME: ''
+    REQUIRES_HTTPS: 'Dit kan alleen gebruikt worden met HTTPS.'
+  SilverStripe\WebAuthn\RegisterHandler:
+    DESCRIPTION: 'Een USB apparaat voor bevestiging'
+    SUPPORT_LINK_DESCRIPTION: ''
