@@ -1,0 +1,7 @@
+da:
+  SilverStripe\WebAuthn\Method:
+    NAME: ''
+    REQUIRES_HTTPS: 'Denne metode kan kun benyttes over HTTPS.'
+  SilverStripe\WebAuthn\RegisterHandler:
+    DESCRIPTION: 'Et lille USB stik der bruges til at bekræfte det er dig'
+    SUPPORT_LINK_DESCRIPTION: ''

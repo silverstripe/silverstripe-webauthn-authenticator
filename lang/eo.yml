@@ -1,0 +1,7 @@
+eo:
+  SilverStripe\WebAuthn\Method:
+    NAME: ''
+    REQUIRES_HTTPS: 'Ĉi tiu metodo estas uzebla nur per HTTPS.'
+  SilverStripe\WebAuthn\RegisterHandler:
+    DESCRIPTION: 'Malgranda USB-ilo, kiu estas uzebla por aŭtentigi vin'
+    SUPPORT_LINK_DESCRIPTION: ''
