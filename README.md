@@ -21,6 +21,7 @@ authenticators such as fingerprint scanners. More information on this can be fou
 
 * SilverStripe ^4.1
 * silverstripe/mfa ^4.0
+* PHP GMP extension
 * [Yarn](https://yarnpkg.com/lang/en/), [NodeJS](https://nodejs.org/en/) (>=10) and [npm](https://npmjs.com) (for building
   frontend assets)
 
