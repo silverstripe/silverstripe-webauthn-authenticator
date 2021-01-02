@@ -10,7 +10,7 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnRegister.COMPLETEREGISTRATION": "Registri",
     "MFAWebAuthnRegister.DESCRIPTION": "Kontaktu vian administranton se vi bezonas sekurecan ŝlosilon.",
     "MFAWebAuthnRegister.FAILURE": "Io paneis. Bonvolu re-enmeti vian ŝlosilon kaj reprovi",
-    "MFAWebAuthnRegister.HELP": "How to use security keys.",
+    "MFAWebAuthnRegister.HELP": "Kiel uzi sekurigajn ŝlosilojn",
     "MFAWebAuthnRegister.INSTRUCTION": "Enigu sekurecan ŝlosilon kaj premu {button}",
     "MFAWebAuthnRegister.REGISTER": "Registri ŝlosilon",
     "MFAWebAuthnRegister.REGISTERING": "Registri",
