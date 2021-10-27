@@ -3,7 +3,7 @@
 namespace SilverStripe\WebAuthn\Tests;
 
 use Exception;
-use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
@@ -54,7 +54,7 @@ class VerifyHandlerTest extends SapphireTest
      */
     protected $mockData = [];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -94,11 +94,9 @@ class VerifyHandlerTest extends SapphireTest
         // phpcs:enable
     }
 
-    /**
-     * @expectedException \SilverStripe\MFA\Exception\AuthenticationFailedException
-     */
     public function testStartThrowsExceptionWithMissingData()
     {
+        $this->expectException(\SilverStripe\MFA\Exception\AuthenticationFailedException::class);
         $this->registeredMethod->Data = '';
         $this->handler->start($this->store, $this->registeredMethod);
     }
@@ -115,7 +113,7 @@ class VerifyHandlerTest extends SapphireTest
         $result = $this->handler->verify($this->request, $this->store, $this->registeredMethod);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertContains('Incomplete data', $result->getMessage());
+        $this->assertStringContainsString('Incomplete data', $result->getMessage());
     }
 
     /**
@@ -129,7 +127,7 @@ class VerifyHandlerTest extends SapphireTest
         $expectedResult,
         callable $responseValidatorMockCallback = null
     ) {
-        /** @var VerifyHandler&PHPUnit_Framework_MockObject_MockObject $handlerMock */
+        /** @var VerifyHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(VerifyHandler::class)
             ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAssertionResponseValidator'])
             ->getMock();
@@ -162,7 +160,7 @@ class VerifyHandlerTest extends SapphireTest
 
         $this->assertSame($expectedResult->isSuccessful(), $result->isSuccessful());
         if ($expectedResult->getMessage()) {
-            $this->assertContains($expectedResult->getMessage(), $result->getMessage());
+            $this->assertStringContainsString($expectedResult->getMessage(), $result->getMessage());
         }
     }
 
@@ -183,15 +181,20 @@ class VerifyHandlerTest extends SapphireTest
             'valid response' => [
                 $this->createMock(AuthenticatorAssertionResponse::class),
                 new Result(true),
-                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
-                    $responseValidatorMock->expects($this->once())->method('check')->willReturn(true);
+                    $responseValidatorMock
+                        ->expects($this->once())
+                        ->method('check')
+                        ->willReturnCallback(function (): bool {
+                            return true;
+                        });
                 },
             ],
             'invalid response' => [
                 $this->createMock(AuthenticatorAssertionResponse::class),
                 new Result(false, 'I am a test'),
-                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock->expects($this->once())->method('check')
                         ->willThrowException(new Exception('I am a test'));

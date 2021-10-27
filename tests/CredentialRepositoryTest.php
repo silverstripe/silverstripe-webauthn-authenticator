@@ -17,12 +17,10 @@ class CredentialRepositoryTest extends SapphireTest
         $this->assertFalse($repo->has('barbaz'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Given credential ID does not match any stored credentials
-     */
     public function testGetThrowsExceptionOnInvalidCredentialId()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Given credential ID does not match any stored credentials');
         $repo = new CredentialRepository('1');
         $repo->get('non-existent');
     }
