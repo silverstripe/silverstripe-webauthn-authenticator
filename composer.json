@@ -9,7 +9,7 @@
     "license": "BSD-3-Clause",
     "require": {
         "silverstripe/mfa": "^4.0",
-        "web-auth/webauthn-lib": "^1.0",
+        "web-auth/webauthn-lib": "^3.3",
         "guzzlehttp/psr7": "^1.6"
     },
     "require-dev": {
