@@ -33,7 +33,7 @@ class MethodTest extends SapphireTest
     public function testGetThumbnail()
     {
         $method = new Method();
-        $this->assertContains('images/securityKey.svg', $method->getThumbnail());
+        $this->assertStringContainsString('images/securityKey.svg', $method->getThumbnail());
     }
 
     public function testApplyRequirements()
@@ -63,6 +63,6 @@ class MethodTest extends SapphireTest
     public function testGetUnavailableMessage()
     {
         $method = new Method();
-        $this->assertContains('can only be used over HTTPS', $method->getUnavailableMessage());
+        $this->assertStringContainsString('can only be used over HTTPS', $method->getUnavailableMessage());
     }
 }

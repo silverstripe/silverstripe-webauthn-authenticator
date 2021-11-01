@@ -3,7 +3,7 @@
 namespace SilverStripe\WebAuthn\Tests;
 
 use Exception;
-use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
@@ -55,7 +55,7 @@ class RegisterHandlerTest extends SapphireTest
      */
     protected $originalServer;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -77,7 +77,7 @@ class RegisterHandlerTest extends SapphireTest
         );
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $_SERVER = $this->originalServer;
 
@@ -157,7 +157,7 @@ class RegisterHandlerTest extends SapphireTest
         $result = $this->handler->register($this->request, $this->store);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertContains('Incomplete data', $result->getMessage());
+        $this->assertStringContainsString('Incomplete data', $result->getMessage());
     }
 
     /**
@@ -175,7 +175,7 @@ class RegisterHandlerTest extends SapphireTest
         callable $responseValidatorMockCallback = null,
         callable $storeModifier = null
     ) {
-        /** @var RegisterHandler&PHPUnit_Framework_MockObject_MockObject $handlerMock */
+        /** @var RegisterHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(RegisterHandler::class)
             ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAttestationResponseValidator'])
             ->getMock();
@@ -213,7 +213,7 @@ class RegisterHandlerTest extends SapphireTest
 
         $this->assertSame($expectedResult->isSuccessful(), $result->isSuccessful());
         if ($expectedResult->getMessage()) {
-            $this->assertContains($expectedResult->getMessage(), $result->getMessage());
+            $this->assertStringContainsString($expectedResult->getMessage(), $result->getMessage());
         }
 
         $this->assertCount(
@@ -279,18 +279,28 @@ class RegisterHandlerTest extends SapphireTest
                 $responseMock,
                 new Result(true),
                 1,
-                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
-                    $responseValidatorMock->expects($this->once())->method('check')->willReturn(true);
+                    $responseValidatorMock
+                        ->expects($this->once())
+                        ->method('check')
+                        ->willReturnCallback(function (): bool {
+                            return true;
+                        });
                 },
             ],
             'valid response with existing credential' => [
                 $responseMock,
                 new Result(true),
                 1,
-                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
-                    $responseValidatorMock->expects($this->once())->method('check')->willReturn(true);
+                    $responseValidatorMock
+                        ->expects($this->once())
+                        ->method('check')
+                        ->willReturnCallback(function (): bool {
+                            return true;
+                        });
                 },
                 function (SessionStore $store) use ($testSource) {
                     $repo = new CredentialRepository((string) $store->getMember()->ID);
@@ -316,7 +326,7 @@ class RegisterHandlerTest extends SapphireTest
                 $responseMock,
                 new Result(false, 'I am a test'),
                 0,
-                function (PHPUnit_Framework_MockObject_MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock->expects($this->once())->method('check')
                         ->willThrowException(new Exception('I am a test'));
