@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SilverStripe\WebAuthn;
 
 use CBOR\Decoder;
+use Cose\Algorithm\Manager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use InvalidArgumentException;
@@ -22,6 +23,7 @@ use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
+use Cose\Algorithm\Signature\ECDSA\ES256;
 
 class VerifyHandler implements VerifyHandlerInterface
 {
@@ -160,13 +162,9 @@ class VerifyHandler implements VerifyHandlerInterface
             return $source->getPublicKeyCredentialDescriptor();
         }, $validCredentials);
 
-        $options = new PublicKeyCredentialRequestOptions(
-            random_bytes(32),
-            40000,
-            null,
-            $descriptors,
-            PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED
-        );
+        $options = new PublicKeyCredentialRequestOptions(random_bytes(32), 40000);
+        $options->allowCredentials($descriptors);
+        $options->setUserVerification(PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED);
 
         // Persist the options for later
         $store->addState(['credentialOptions' => $options]);
@@ -183,11 +181,13 @@ class VerifyHandler implements VerifyHandlerInterface
         Decoder $decoder,
         StoreInterface $store
     ): AuthenticatorAssertionResponseValidator {
+        $manager = new Manager();
+        $manager->add(new ES256());
         return new AuthenticatorAssertionResponseValidator(
             $this->getCredentialRepository($store),
-            $decoder,
             new TokenBindingNotSupportedHandler(),
-            new ExtensionOutputCheckerHandler()
+            new ExtensionOutputCheckerHandler(),
+            $manager
         );
     }
 }

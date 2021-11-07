@@ -19,6 +19,7 @@ use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorResponse;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialSource;
 
 class VerifyHandlerTest extends SapphireTest
 {
@@ -132,7 +133,10 @@ class VerifyHandlerTest extends SapphireTest
             ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAssertionResponseValidator'])
             ->getMock();
 
+        $publicKeyCredentialSourceMock = $this->createMock(PublicKeyCredentialSource::class);
         $responseValidatorMock = $this->createMock(AuthenticatorAssertionResponseValidator::class);
+        $responseValidatorMock->method('check')->willReturn($publicKeyCredentialSourceMock);
+
         // Allow the data provider to customise the validation check handling
         if ($responseValidatorMockCallback) {
             $responseValidatorMockCallback($responseValidatorMock);
