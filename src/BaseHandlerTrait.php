@@ -21,6 +21,10 @@ trait BaseHandlerTrait
 {
     /**
      * @return Decoder
+     *
+     * @deprecated will be removed in 5.0 - as of v3 of webauthn-lib the Decoder is now created within both:
+     * AttestationObjectLoader::__construct()
+     * AuthenticatorAssertionResponseValidator::__construct()
      */
     protected function getDecoder(): Decoder
     {
@@ -48,7 +52,7 @@ trait BaseHandlerTrait
         AttestationStatementSupportManager $attestationStatementSupportManager,
         Decoder $decoder
     ): AttestationObjectLoader {
-        return new AttestationObjectLoader($attestationStatementSupportManager, $decoder);
+        return new AttestationObjectLoader($attestationStatementSupportManager);
     }
 
     /**
@@ -60,6 +64,6 @@ trait BaseHandlerTrait
         AttestationObjectLoader $attestationObjectLoader,
         Decoder $decoder
     ): PublicKeyCredentialLoader {
-        return new PublicKeyCredentialLoader($attestationObjectLoader, $decoder);
+        return new PublicKeyCredentialLoader($attestationObjectLoader);
     }
 }

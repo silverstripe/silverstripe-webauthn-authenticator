@@ -109,6 +109,7 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         $options = $this->getCredentialCreationOptions($store);
         $data = json_decode((string) $request->getBody(), true);
+        $publicKeyCredentialSource = null;
 
         try {
             if (empty($data['credentials'])) {
@@ -134,7 +135,8 @@ class RegisterHandler implements RegisterHandlerInterface
             $psrRequest = ServerRequest::fromGlobals();
 
             // Validate the webauthn response
-            $this->getAuthenticatorAttestationResponseValidator($attestationStatementSupportManager, $store)
+            $publicKeyCredentialSource = $this
+                ->getAuthenticatorAttestationResponseValidator($attestationStatementSupportManager, $store)
                 ->check($response, $options, $psrRequest);
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
@@ -143,17 +145,12 @@ class RegisterHandler implements RegisterHandlerInterface
 
         $credentialRepository = $this->getCredentialRepository($store);
 
-        $source = PublicKeyCredentialSource::createFromPublicKeyCredential(
-            $publicKeyCredential,
-            $options->getUser()->getId()
-        );
-
         // Clear the repository so only one key is registered at a time
         // NOTE: This can be considered temporary behaviour until the UI supports managing multiple keys
         $credentialRepository->reset();
 
         // Persist the "credential source"
-        $credentialRepository->saveCredentialSource($source);
+        $credentialRepository->saveCredentialSource($publicKeyCredentialSource);
 
         return Result::create()->setContext($credentialRepository->toArray());
     }
@@ -259,12 +256,10 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
             [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
-            40000,
-            [],
-            $this->getAuthenticatorSelectionCriteria(),
-            PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
-            new AuthenticationExtensionsClientInputs()
+            40000
         );
+        $credentialOptions->setAuthenticatorSelection($this->getAuthenticatorSelectionCriteria());
+        $credentialOptions->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
 
         $store->setState(['credentialOptions' => $credentialOptions] + $state);
 

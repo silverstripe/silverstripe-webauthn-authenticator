@@ -180,7 +180,10 @@ class RegisterHandlerTest extends SapphireTest
             ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAttestationResponseValidator'])
             ->getMock();
 
+        $publicKeyCredentialSourceMock = $this->createMock(PublicKeyCredentialSource::class);
         $responseValidatorMock = $this->createMock(AuthenticatorAttestationResponseValidator::class);
+        $responseValidatorMock->method('check')->willReturn($publicKeyCredentialSourceMock);
+
         // Allow the data provider to customise the validation check handling
         if ($responseValidatorMockCallback) {
             $responseValidatorMockCallback($responseValidatorMock);
