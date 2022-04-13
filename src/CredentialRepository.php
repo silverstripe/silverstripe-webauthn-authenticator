@@ -195,16 +195,41 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
         return $new;
     }
 
-    public function serialize()
+    public function __serialize(): array
     {
-        return json_encode(['credentials' => $this->toArray(), 'memberID' => $this->memberID]);
+        return [
+            'memberID' => $this->memberID,
+            'credentials' => $this->toArray()
+        ];
     }
 
+    public function __unserialize(array $data): void
+    {
+        $this->memberID = $data['memberID'];
+        $this->setCredentials($data['credentials']);
+    }
+
+    /**
+     * The __serialize() magic method will be automatically used instead of this
+     *
+     * @return string
+     * @deprecated will be removed in 5.0
+     */
+    public function serialize()
+    {
+        return json_encode($this->__serialize());
+    }
+
+    /**
+     * The __unserialize() magic method will be automatically used instead of this almost all the time
+     * This method will be automatically used if existing serialized data was not saved as an associative array
+     * and the PHP version used in less than PHP 9.0
+     *
+     * @param string $serialized
+     * @deprecated will be removed in 5.0
+     */
     public function unserialize($serialized)
     {
-        $raw = json_decode($serialized, true);
-
-        $this->memberID = $raw['memberID'];
-        $this->setCredentials($raw['credentials']);
+        $this->__unserialize(json_decode($serialized, true));
     }
 }
