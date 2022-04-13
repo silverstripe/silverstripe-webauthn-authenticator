@@ -110,7 +110,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
 
         return array_map(function ($credentialComposite) {
             return $credentialComposite['source'];
-        }, $this->credentials);
+        }, $this->credentials ?? []);
     }
 
     public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
@@ -156,7 +156,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
         $this->credentials = array_map(function ($data) {
             $data['source'] = PublicKeyCredentialSource::createFromArray($data['source']);
             return $data;
-        }, $credentials);
+        }, $credentials ?? []);
     }
 
     /**
@@ -167,7 +167,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
      */
     protected function getCredentialIDRef(string $credentialID): string
     {
-        return base64_encode($credentialID);
+        return base64_encode($credentialID ?? '');
     }
 
     /**
@@ -230,6 +230,6 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
      */
     public function unserialize($serialized)
     {
-        $this->__unserialize(json_decode($serialized, true));
+        $this->__unserialize(json_decode($serialized ?? '', true));
     }
 }
