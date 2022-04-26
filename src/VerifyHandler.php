@@ -95,7 +95,7 @@ class VerifyHandler implements VerifyHandlerInterface
             $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
             $publicKeyCredential = $this
                 ->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder)
-                ->load(base64_decode($data['credentials']));
+                ->load(base64_decode($data['credentials'] ?? ''));
 
             $response = $publicKeyCredential->getResponse();
             if (!$response instanceof AuthenticatorAssertionResponse) {
@@ -154,13 +154,13 @@ class VerifyHandler implements VerifyHandlerInterface
         $validCredentials = $this->getCredentialRepository($store, $registeredMethod)
             ->findAllForUserEntity($this->getUserEntity($store->getMember()));
 
-        if (!count($validCredentials)) {
+        if (!count($validCredentials ?? [])) {
             throw new AuthenticationFailedException('User does not appear to have any credentials loaded for webauthn');
         }
 
         $descriptors = array_map(function (PublicKeyCredentialSource $source) {
             return $source->getPublicKeyCredentialDescriptor();
-        }, $validCredentials);
+        }, $validCredentials ?? []);
 
         $options = new PublicKeyCredentialRequestOptions(random_bytes(32), 40000);
         $options->allowCredentials($descriptors);

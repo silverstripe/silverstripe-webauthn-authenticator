@@ -39,7 +39,7 @@ trait CredentialRepositoryProviderTrait
 
         if ($registeredMethod) {
             $credentialRepository = CredentialRepository::fromArray(
-                (array) json_decode($registeredMethod->Data, true),
+                (array) json_decode($registeredMethod->Data ?? '', true),
                 (string) $member->ID
             );
         } else {

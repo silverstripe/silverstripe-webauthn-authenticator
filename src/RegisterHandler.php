@@ -120,7 +120,7 @@ class RegisterHandler implements RegisterHandlerInterface
             $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
             $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
             $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
-            $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials']));
+            $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials'] ?? ''));
             $response = $publicKeyCredential->getResponse();
 
             if (!$response instanceof AuthenticatorAttestationResponse) {
@@ -226,7 +226,7 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         // Relying party entity ONLY allows domains or subdomains. Remove ports or anything else that isn't already.
         // See https://github.com/web-auth/webauthn-framework/blob/v1.2.2/doc/webauthn/PublicKeyCredentialCreation.md#relying-party-entity
-        $host = parse_url(Director::host(), PHP_URL_HOST);
+        $host = parse_url(Director::host() ?? '', PHP_URL_HOST);
 
         return new PublicKeyCredentialRpEntity(
             (string) SiteConfig::current_site_config()->Title,
