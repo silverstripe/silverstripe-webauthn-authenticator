@@ -2,3 +2,9 @@ version: ~> 1.0
 
 import:
   - silverstripe/silverstripe-travis-shared:config/provision/standard-jobs-range-npm.yml
+
+env:
+  global:
+    # Require mfa 4.x-dev instead of ^4 as defined in composer for php 8.1 compatibility
+    # This can be removed once a stable php 8.1 compatible version is released
+    - REQUIRE_EXTRA="silverstripe/mfa:4.x-dev"
