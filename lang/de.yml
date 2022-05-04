@@ -1,0 +1,7 @@
+de:
+  SilverStripe\WebAuthn\Method:
+    NAME: Sicherheitsschlüssel
+    REQUIRES_HTTPS: 'Diese Methode kann nur über HTTPS verwendet werden.'
+  SilverStripe\WebAuthn\RegisterHandler:
+    DESCRIPTION: 'Ein kleines USB-Gerät, mit dem Sie sich verifizieren können'
+    SUPPORT_LINK_DESCRIPTION: 'Wie man Sicherheitsschlüssel verwendet.'
