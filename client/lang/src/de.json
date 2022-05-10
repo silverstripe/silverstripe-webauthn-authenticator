@@ -1,0 +1,21 @@
+{
+    "MFAWebAuthnRegister.BACK": "Zurück",
+    "MFAWebAuthnRegister.COMPLETEREGISTRATION": "Vollständige Registrierung",
+    "MFAWebAuthnRegister.DESCRIPTION": "Wenden Sie sich an Ihren Administrator, wenn Sie einen Sicherheitsschlüssel benötigen. ",
+    "MFAWebAuthnRegister.FAILURE": "Es ist ein Fehler aufgetreten. Bitte stecken Sie Ihren Schlüssel wieder ein und versuchen Sie es erneut.",
+    "MFAWebAuthnRegister.HELP": "Wie man Sicherheitsschlüssel verwendet.",
+    "MFAWebAuthnRegister.INSTRUCTION": "Sicherheitsschlüssel einführen und {Button} drücken",
+    "MFAWebAuthnRegister.REGISTER": "Schlüssel registrieren",
+    "MFAWebAuthnRegister.REGISTERING": "Registrierung",
+    "MFAWebAuthnRegister.RETRY": "Retry",
+    "MFAWebAuthnRegister.SUCCESS": "Schlüssel geprüft",
+    "MFAWebAuthnRegister.WAITING": "Warten",
+    "MFAWebAuthnVerify.DESCRIPTION": "Verwenden Sie Ihren Sicherheitsschlüssel, um Ihre Identität zu überprüfen.",
+    "MFAWebAuthnVerify.FAILURE": "Es ist ein Fehler aufgetreten. Bitte stecken Sie Ihren Schlüssel wieder ein und versuchen Sie es erneut.",
+    "MFAWebAuthnVerify.HELP": "Wie man Sicherheitsschlüssel verwendet.",
+    "MFAWebAuthnVerify.INSTRUCTION": "Bitte geben Sie Ihren Sicherheitsschlüssel und {Button} ein.",
+    "MFAWebAuthnVerify.RETRY": "Erneut versuchen",
+    "MFAWebAuthnVerify.SUCCESS": "Anmelden...",
+    "MFAWebAuthnVerify.VERIFY": "activate it",
+    "MFAWebAuthnVerify.WAITING": "Warten"
+}

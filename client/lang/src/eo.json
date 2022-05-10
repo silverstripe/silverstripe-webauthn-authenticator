@@ -10,7 +10,6 @@
     "MFAWebAuthnRegister.RETRY": "Reprovi",
     "MFAWebAuthnRegister.SUCCESS": "Aŭtentigis ŝlosilon",
     "MFAWebAuthnRegister.WAITING": "Atendas",
-
     "MFAWebAuthnVerify.DESCRIPTION": "Uzu viajn sekurecan ŝlosilon por aŭtentigi vin.",
     "MFAWebAuthnVerify.FAILURE": "Io paneis. Bonvolu re-enmeti vian ŝlosilon kaj reprovi",
     "MFAWebAuthnVerify.HELP": "Kiel uzi sekurigajn ŝlosilojn",

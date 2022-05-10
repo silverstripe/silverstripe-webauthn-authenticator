@@ -10,7 +10,6 @@
     "MFAWebAuthnRegister.RETRY": "Opnieuw proberen",
     "MFAWebAuthnRegister.SUCCESS": "Sleutel verifieren",
     "MFAWebAuthnRegister.WAITING": "Wachten",
-
     "MFAWebAuthnVerify.DESCRIPTION": "Gebruik de beveiligingssleutel om verder te gaan.",
     "MFAWebAuthnVerify.FAILURE": "Er is iets misgegaan. Sluit de sleutel opnieuw aan en probeer opnieuw",
     "MFAWebAuthnVerify.HELP": "Over het gebruik van beveiligingssleutels",

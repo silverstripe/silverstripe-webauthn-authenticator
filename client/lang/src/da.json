@@ -10,7 +10,6 @@
     "MFAWebAuthnRegister.RETRY": "Prøv igen",
     "MFAWebAuthnRegister.SUCCESS": "Nøgle verificeret",
     "MFAWebAuthnRegister.WAITING": "Venter",
-
     "MFAWebAuthnVerify.DESCRIPTION": "Brug din sikkerhedsnøgle til at bekræfte din identitet.",
     "MFAWebAuthnVerify.FAILURE": "Noget gik galt, genindsæt nøglen og prøv igen",
     "MFAWebAuthnVerify.HELP": "Sådan bruges sikkerhedsnøgler",

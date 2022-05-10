@@ -10,7 +10,6 @@
     "MFAWebAuthnRegister.RETRY": "Retry",
     "MFAWebAuthnRegister.SUCCESS": "Key verified",
     "MFAWebAuthnRegister.WAITING": "Waiting",
-
     "MFAWebAuthnVerify.DESCRIPTION": "Use your security key to verify your identity.",
     "MFAWebAuthnVerify.FAILURE": "Something went wrong, please re-insert your key and try again",
     "MFAWebAuthnVerify.HELP": "How to use security keys.",
