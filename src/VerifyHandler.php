@@ -146,8 +146,12 @@ class VerifyHandler implements VerifyHandlerInterface
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
 
-        if (!$reset && !empty($state) && !empty($state['credentialOptions'])) {
-            return PublicKeyCredentialRequestOptions::createFromArray($state['credentialOptions']);
+        if (
+            !$reset &&
+            isset($state['credentialOptions']) &&
+            $state['credentialOptions'] instanceof PublicKeyCredentialRequestOptions
+        ) {
+            return $state['credentialOptions'];
         }
 
         // Use the interface methods (despite the fact the "repository" is per-member in this module)

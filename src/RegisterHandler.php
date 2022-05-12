@@ -247,8 +247,12 @@ class RegisterHandler implements RegisterHandlerInterface
     ): PublicKeyCredentialCreationOptions {
         $state = $store->getState();
 
-        if (!$reset && !empty($state) && !empty($state['credentialOptions'])) {
-            return PublicKeyCredentialCreationOptions::createFromArray($state['credentialOptions']);
+        if (
+            !$reset &&
+            isset($state['credentialOptions']) &&
+            $state['credentialOptions'] instanceof PublicKeyCredentialCreationOptions
+        ) {
+            return $state['credentialOptions'];
         }
 
         $credentialOptions = new PublicKeyCredentialCreationOptions(
