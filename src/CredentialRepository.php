@@ -154,7 +154,9 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
     protected function setCredentials(array $credentials): void
     {
         $this->credentials = array_map(function ($data) {
-            $data['source'] = PublicKeyCredentialSource::createFromArray($data['source']);
+            if (is_array($data['source'])) {
+                $data['source'] = PublicKeyCredentialSource::createFromArray($data['source']);
+            }
             return $data;
         }, $credentials ?? []);
     }
