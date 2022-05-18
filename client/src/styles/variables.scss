@@ -21,8 +21,10 @@ $mobile-breakpoint: 420px;
 :root {
   --color-status-good: $color-status-good;
   --color-status-bad: $color-status-bad;
+}
 
-  @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+  .dark-mode-enabled {
     --color-status-good: $dark-color-status-good;
     --color-status-bad: $dark-color-status-bad;
   }
