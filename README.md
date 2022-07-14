@@ -1,6 +1,6 @@
 # SilverStripe WebAuthn Authenticator
 
-[![Build Status](https://api.travis-ci.com/silverstripe/silverstripe-webauthn-authenticator.svg?branch=4)](https://travis-ci.com/silverstripe/silverstripe-webauthn-authenticator)
+[![CI](https://github.com/silverstripe/silverstripe-webauthn-authenticator/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/silverstripe-webauthn-authenticator/actions/workflows/ci.yml)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/silverstripe-webauthn-authenticator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/silverstripe-webauthn-authenticator/?branch=master)
 [![codecov](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator/branch/master/graph/badge.svg)](https://codecov.io/gh/silverstripe/silverstripe-webauthn-authenticator)
 [![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
