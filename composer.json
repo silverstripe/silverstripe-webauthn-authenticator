@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.4 || ^8.0",
         "ext-bcmath": "*",
+        "silverstripe/framework": "^4.12",
         "silverstripe/mfa": "^4.6",
         "web-auth/webauthn-lib": "^3.3",
         "guzzlehttp/psr7": "^2"

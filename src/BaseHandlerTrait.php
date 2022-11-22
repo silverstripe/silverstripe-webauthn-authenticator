@@ -12,6 +12,7 @@ use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\PublicKeyCredentialLoader;
+use SilverStripe\Dev\Deprecation;
 
 /**
  * Contains logic which is shared between both WebAuthn's RegisterHandler and VerifyHandler, such as
@@ -22,13 +23,18 @@ trait BaseHandlerTrait
     /**
      * @return Decoder
      *
-     * @deprecated will be removed in 5.0 - as of v3 of webauthn-lib the Decoder is now created within both:
+     * @deprecated 4.5.0 Will be removed without equivalent functionality to replace it
+     *
+     * No longer needed as of v3 of webauthn-lib the Decoder is now created within both:
      * AttestationObjectLoader::__construct()
      * AuthenticatorAssertionResponseValidator::__construct()
      */
     protected function getDecoder(): Decoder
     {
-        return new Decoder(new TagObjectManager(), new OtherObjectManager());
+        return Deprecation::withNoReplacement(function () {
+            Deprecation::notice('4.5.0', 'Will be removed without equivalent functionality to replace it');
+            return new Decoder(new TagObjectManager(), new OtherObjectManager());
+        });
     }
 
     /**
