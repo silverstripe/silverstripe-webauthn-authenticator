@@ -283,8 +283,7 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     protected function getAuthenticatorSelectionCriteria(): AuthenticatorSelectionCriteria
     {
-        return new AuthenticatorSelectionCriteria(
-            (string) $this->config()->get('authenticator_attachment')
-        );
-    }
+        return AuthenticatorSelectionCriteria::create()
+            ->setAuthenticatorAttachment((string) $this->config()->get('authenticator_attachment'));
+        }
 }

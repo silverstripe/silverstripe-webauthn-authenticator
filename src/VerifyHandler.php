@@ -8,7 +8,6 @@ use CBOR\Decoder;
 use Cose\Algorithm\Manager;
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
-use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\MFA\Exception\AuthenticationFailedException;
@@ -19,7 +18,6 @@ use SilverStripe\MFA\Store\StoreInterface;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
@@ -167,7 +165,8 @@ class VerifyHandler implements VerifyHandlerInterface
         }, $validCredentials ?? []);
 
         $options = new PublicKeyCredentialRequestOptions(random_bytes(32), 40000);
-        $options->allowCredentials($descriptors);
+        
+        $options->allowCredentials(...$descriptors);
         $options->setUserVerification(PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED);
 
         // Persist the options for later

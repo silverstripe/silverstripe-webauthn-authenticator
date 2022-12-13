@@ -6,7 +6,7 @@ namespace SilverStripe\WebAuthn;
 
 use CBOR\Decoder;
 use CBOR\OtherObject\OtherObjectManager;
-use CBOR\Tag\TagObjectManager;
+use CBOR\Tag\TagManager;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
@@ -33,7 +33,7 @@ trait BaseHandlerTrait
     {
         return Deprecation::withNoReplacement(function () {
             Deprecation::notice('4.5.0', 'Will be removed without equivalent functionality to replace it');
-            return new Decoder(new TagObjectManager(), new OtherObjectManager());
+            return new Decoder(new TagManager(), new OtherObjectManager());
         });
     }
 

@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\WebAuthn\CredentialRepository;
 use Webauthn\AttestedCredentialData;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class CredentialRepositoryTest extends SapphireTest
 {
@@ -62,7 +63,7 @@ class CredentialRepositoryTest extends SapphireTest
             // phpcs:disable
             $creds[base64_encode($id)] = [
                 'source' => [
-                    'publicKeyCredentialId' => $id,
+                    'publicKeyCredentialId' => base64_encode($id),
                     'type' => 'public-key',
                     'transports' =>
                         array (
@@ -70,12 +71,12 @@ class CredentialRepositoryTest extends SapphireTest
                         'attestationType' => 'none',
                         'trustPath' =>
                         array (
-                            'type' => 'empty',
+                            'type' => EmptyTrustPath::class,
                         ),
-                        'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
-                        'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
-                        'userHandle' => 'MQ',
-                        'counter' => 268,
+                        'aaguid' => 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+                        'credentialPublicKey' => 'cHVibGljS2V5',
+                        'userHandle' => 'dXNlckhhbmRsZQ',
+                        'counter' => 123456789,
                 ],
                 'counter' => $counterValue,
             ];
