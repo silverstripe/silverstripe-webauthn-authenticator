@@ -20,6 +20,7 @@ use Webauthn\AuthenticatorResponse;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class VerifyHandlerTest extends SapphireTest
 {
@@ -72,9 +73,9 @@ class VerifyHandlerTest extends SapphireTest
 
         // phpcs:disable
         $this->registeredMethod->Data = json_encode([
-            'g8e1UH4B1gUYl\/7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN\/e34hDE1Mnd4FSOoNW6B+p7xB2tqj28svkJQh1Q==' => [
+            'cHVibGljS2V5Q3JlZGVudGlhbElk' => [
                 'source' => [
-                    'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW6B-p7xB2tqj28svkJQh1Q',
+                    'publicKeyCredentialId' => 'cHVibGljS2V5Q3JlZGVudGlhbElk',
                     'type' => 'public-key',
                     'transports' =>
                         array (
@@ -82,12 +83,12 @@ class VerifyHandlerTest extends SapphireTest
                     'attestationType' => 'none',
                     'trustPath' =>
                         array (
-                            'type' => 'empty',
+                            'type' => EmptyTrustPath::class,
                         ),
-                    'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
-                    'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
-                    'userHandle' => 'MQ',
-                    'counter' => 268,
+                    'aaguid' => 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+                    'credentialPublicKey' => 'cHVibGljS2V5',
+                    'userHandle' => 'dXNlckhhbmRsZQ',
+                    'counter' => 123456789,
                 ],
                 'counter' => 0,
             ]

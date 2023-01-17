@@ -8,11 +8,11 @@
     ],
     "license": "BSD-3-Clause",
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^8.1",
         "ext-bcmath": "*",
-        "silverstripe/framework": "^4.12",
-        "silverstripe/mfa": "^4.6",
-        "web-auth/webauthn-lib": "^3.3",
+        "silverstripe/framework": "^5",
+        "silverstripe/mfa": "^5",
+        "web-auth/webauthn-lib": "^4.4",
         "guzzlehttp/psr7": "^2"
     },
     "require-dev": {

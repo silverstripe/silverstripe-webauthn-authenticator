@@ -25,6 +25,7 @@ use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 class RegisterHandlerTest extends SapphireTest
 {
@@ -236,17 +237,20 @@ class RegisterHandlerTest extends SapphireTest
     {
         // phpcs:disable
         $testSource = PublicKeyCredentialSource::createFromArray([
-            'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW6B-p7xB2tqj28svkJQh1Q',
+            'publicKeyCredentialId' => 'cHVibGljS2V5Q3JlZGVudGlhbElk',
             'type' => 'public-key',
-            'transports' => [],
+            'transports' =>
+                array (
+                ),
             'attestationType' => 'none',
-            'trustPath' => [
-                'type' => 'empty',
-            ],
-            'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
-            'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
-            'userHandle' => 'MQ',
-            'counter' => 268,
+            'trustPath' =>
+                array (
+                    'type' => EmptyTrustPath::class,
+                ),
+            'aaguid' => 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+            'credentialPublicKey' => 'cHVibGljS2V5',
+            'userHandle' => 'dXNlckhhbmRsZQ',
+            'counter' => 123456789,
         ]);
         // phpcs:enable
 
@@ -309,17 +313,20 @@ class RegisterHandlerTest extends SapphireTest
                     $repo = new CredentialRepository((string) $store->getMember()->ID);
                     // phpcs:disable
                     $repo->saveCredentialSource(PublicKeyCredentialSource::createFromArray([
-                        'publicKeyCredentialId' => 'g8e1UH4B1gUYl_7AiDXHTp8SE3cxYnpC6jF3Fo0KMm79FNN_e34hDE1Mnd4FSOoNW245125129518925891',
+                        'publicKeyCredentialId' => 'cHVibGljS2V5Q3JlZGVudGlhbElk',
                         'type' => 'public-key',
-                        'transports' => [],
+                        'transports' =>
+                            array (
+                            ),
                         'attestationType' => 'none',
-                        'trustPath' => [
-                            'type' => 'empty',
-                        ],
-                        'aaguid' => 'AAAAAAAAAAAAAAAAAAAAAA',
-                        'credentialPublicKey' => 'pQECAyYgASFYII3gDdvOBje5JfjNO0VhxE2RrV5XoKqWmCZAmR0f9nFaIlggZOUvkovGH9cfeyfXEpJAVOzR1d-rVRZJvwWJf444aLo',
-                        'userHandle' => 'MQ',
-                        'counter' => 268,
+                        'trustPath' =>
+                            array (
+                                'type' => EmptyTrustPath::class,
+                            ),
+                        'aaguid' => 'AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA',
+                        'credentialPublicKey' => 'cHVibGljS2V5',
+                        'userHandle' => 'dXNlckhhbmRsZQ',
+                        'counter' => 123456789,
                     ]));
                     // phpcs:enable
                     $store->addState(['repository' => $repo]);
