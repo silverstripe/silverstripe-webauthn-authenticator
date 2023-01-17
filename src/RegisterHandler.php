@@ -285,5 +285,5 @@ class RegisterHandler implements RegisterHandlerInterface
     {
         return AuthenticatorSelectionCriteria::create()
             ->setAuthenticatorAttachment((string) $this->config()->get('authenticator_attachment'));
-        }
+    }
 }
