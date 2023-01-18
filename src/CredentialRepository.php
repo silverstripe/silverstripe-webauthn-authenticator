@@ -10,7 +10,6 @@ use Webauthn\AttestedCredentialData;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
-use SilverStripe\Dev\Deprecation;
 
 /**
  * Implements the required interface from the WebAuthn library - but it does not implement the repository pattern in the
@@ -18,7 +17,7 @@ use SilverStripe\Dev\Deprecation;
  * @see CredentialRepository::hasChanged() API for determining whether a DataObject this is stored upon should be
  * persisted.
  */
-class CredentialRepository implements PublicKeyCredentialSourceRepository, Serializable
+class CredentialRepository implements PublicKeyCredentialSourceRepository
 {
     /**
      * @var string
@@ -210,31 +209,5 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository, Seria
     {
         $this->memberID = $data['memberID'];
         $this->setCredentials($data['credentials']);
-    }
-
-    /**
-     * The __serialize() magic method will be automatically used instead of this
-     *
-     * @return string
-     * @deprecated 4.5.0 Use __serialize() instead
-     */
-    public function serialize()
-    {
-        Deprecation::notice('4.5.0', 'Use __serialize() instead');
-        return json_encode($this->__serialize());
-    }
-
-    /**
-     * The __unserialize() magic method will be automatically used instead of this almost all the time
-     * This method will be automatically used if existing serialized data was not saved as an associative array
-     * and the PHP version used in less than PHP 9.0
-     *
-     * @param string $serialized
-     * @deprecated 4.5.0 Use __unserialize() instead
-     */
-    public function unserialize($serialized)
-    {
-        Deprecation::notice('4.5.0', 'Use __unserialize() instead');
-        $this->__unserialize(json_decode($serialized ?? '', true));
     }
 }

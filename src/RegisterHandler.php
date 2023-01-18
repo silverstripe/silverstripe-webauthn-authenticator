@@ -116,10 +116,9 @@ class RegisterHandler implements RegisterHandlerInterface
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
 
-            $decoder = $this->getDecoder();
-            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
-            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
-            $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder);
+            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager();
+            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager);
+            $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader);
             $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials'] ?? ''));
             $response = $publicKeyCredential->getResponse();
 
