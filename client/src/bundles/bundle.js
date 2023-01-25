@@ -1,4 +1,4 @@
 // Include any legacy Entwine wrappers
 
 // Include boot entrypoint
-require('boot');
+import fallbacks from 'boot';
