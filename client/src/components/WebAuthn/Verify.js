@@ -10,7 +10,7 @@ import CircleWarning from 'components/Icons/CircleWarning';
 import LoadingIndicator from 'components/LoadingIndicator';
 import ActivateToken from '../Icons/ActivateToken';
 
-const fallbacks = require('../../../lang/src/en.json');
+import fallbacks from '../../../lang/src/en.json';
 
 class Verify extends Component {
   constructor(props) {

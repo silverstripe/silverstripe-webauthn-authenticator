@@ -10,7 +10,7 @@ import CircleWarning from 'components/Icons/CircleWarning';
 import LoadingIndicator from 'components/LoadingIndicator';
 import ActivateToken from '../Icons/ActivateToken';
 
-const fallbacks = require('../../../lang/src/en.json');
+import fallbacks from '../../../lang/src/en.json';
 
 export const VIEWS = {
   LOADING: 'LOADING', // Preparing to render the form
@@ -147,17 +147,6 @@ class Register extends Component {
     switch (this.state.view) {
       case VIEWS.READY:
         return (<div className="mfa-registration-container__status status-message--empty" />);
-      case VIEWS.PROMPTING:
-      case VIEWS.LOADING:
-      default:
-        return (
-          <div className="mfa-registration-container__status status-message--loading">
-            <LoadingIndicator size="3em" />
-            <span className="status-message__description">
-              {i18n._t('MFAWebAuthnRegister.WAITING', fallbacks['MFAWebAuthnRegister.WAITING'])}
-            </span>
-          </div>
-        );
       case VIEWS.SUCCESS:
         return (
           <div className="mfa-registration-container__status status-message--success">
@@ -182,6 +171,17 @@ class Register extends Component {
             <span className="status-message__icon"><CircleWarning size="32px" /></span>
             <span className="status-message__description">
               {errors.join(', ')}
+            </span>
+          </div>
+        );
+      case VIEWS.PROMPTING:
+      case VIEWS.LOADING:
+      default:
+        return (
+          <div className="mfa-registration-container__status status-message--loading">
+            <LoadingIndicator size="3em" />
+            <span className="status-message__description">
+              {i18n._t('MFAWebAuthnRegister.WAITING', fallbacks['MFAWebAuthnRegister.WAITING'])}
             </span>
           </div>
         );
@@ -257,6 +257,16 @@ class Register extends Component {
           },
         ];
         break;
+      case VIEWS.SUCCESS:
+        actions = [
+          {
+            action: this.handleNext,
+            name: i18n._t(
+              'MFAWebAuthnRegister.COMPLETEREGISTRATION',
+              fallbacks['MFAWebAuthnRegister.COMPLETEREGISTRATION']
+            ),
+          }];
+        break;
       case VIEWS.LOADING:
       default:
         actions = [
@@ -273,16 +283,6 @@ class Register extends Component {
             name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
           },
         ];
-        break;
-      case VIEWS.SUCCESS:
-        actions = [
-          {
-            action: this.handleNext,
-            name: i18n._t(
-              'MFAWebAuthnRegister.COMPLETEREGISTRATION',
-              fallbacks['MFAWebAuthnRegister.COMPLETEREGISTRATION']
-            ),
-          }];
         break;
     }
 
