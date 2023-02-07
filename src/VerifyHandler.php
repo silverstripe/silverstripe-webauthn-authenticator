@@ -88,11 +88,10 @@ class VerifyHandler implements VerifyHandlerInterface
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
 
-            $decoder = $this->getDecoder();
-            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager($decoder);
-            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager, $decoder);
+            $attestationStatementSupportManager = $this->getAttestationStatementSupportManager();
+            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager);
             $publicKeyCredential = $this
-                ->getPublicKeyCredentialLoader($attestationObjectLoader, $decoder)
+                ->getPublicKeyCredentialLoader($attestationObjectLoader)
                 ->load(base64_decode($data['credentials'] ?? ''));
 
             $response = $publicKeyCredential->getResponse();
@@ -103,7 +102,7 @@ class VerifyHandler implements VerifyHandlerInterface
             // Create a PSR-7 request
             $psrRequest = ServerRequest::fromGlobals();
 
-            $this->getAuthenticatorAssertionResponseValidator($decoder, $store)
+            $this->getAuthenticatorAssertionResponseValidator($store)
                 ->check(
                     $publicKeyCredential->getRawId(),
                     $response,
@@ -176,12 +175,10 @@ class VerifyHandler implements VerifyHandlerInterface
     }
 
     /**
-     * @param Decoder $decoder
      * @param StoreInterface $store
      * @return AuthenticatorAssertionResponseValidator
      */
     protected function getAuthenticatorAssertionResponseValidator(
-        Decoder $decoder,
         StoreInterface $store
     ): AuthenticatorAssertionResponseValidator {
         $manager = new Manager();
