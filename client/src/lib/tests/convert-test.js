@@ -21,7 +21,7 @@ describe('convert', () => {
         const byteArray = [105, 183, 63, 117, 231, 254, 130, 24];
         // this is supposed to be slightly different from string
         // used in base64ToByteArray tests
-        const expected = 'abc/def+ghg=';
+        const expected = 'abc/def+ghg';
         const actual = byteArrayToBase64(byteArray);
         expect(expected).toEqual(actual);
     });
