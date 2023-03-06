@@ -1,6 +1,6 @@
 sv:
   SilverStripe\WebAuthn\Method:
-    NAME: ''
+    NAME: Säkerhetsnyckel
     REQUIRES_HTTPS: 'Den här metoden kan enbart användas via HTTPS'
   SilverStripe\WebAuthn\RegisterHandler:
     DESCRIPTION: ''
