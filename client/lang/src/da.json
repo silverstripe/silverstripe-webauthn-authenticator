@@ -3,7 +3,7 @@
     "MFAWebAuthnRegister.COMPLETEREGISTRATION": "Gennemfør registrering",
     "MFAWebAuthnRegister.DESCRIPTION": "Kontakt din administrator, hvis du har brug for en sikkerhedsnøgle.",
     "MFAWebAuthnRegister.FAILURE": "Noget gik galt. Venligst genindsæt din nøgle og prøv igen",
-    "MFAWebAuthnRegister.HELP": "How to use security keys.",
+    "MFAWebAuthnRegister.HELP": "Sådan bruges sikkerhedsnøgler",
     "MFAWebAuthnRegister.INSTRUCTION": "Indsæt sikkerhedsnøgle og klik på {button}",
     "MFAWebAuthnRegister.REGISTER": "Registrer nøgle",
     "MFAWebAuthnRegister.REGISTERING": "Registrering",
