@@ -218,7 +218,7 @@ Verify.propTypes = {
   method: PropTypes.object.isRequired,
   publicKey: publicKeyType,
   onCompleteVerification: PropTypes.func.isRequired,
-  moreOptionsControl: PropTypes.func,
+  moreOptionsControl: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
   errors: PropTypes.arrayOf(PropTypes.string),
 };
 
