@@ -87,6 +87,7 @@ class VerifyHandler implements VerifyHandlerInterface
             if (empty($data['credentials'])) {
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
+            $data = $this->makeAuthenticatorDataBase64UrlSafe($data);
 
             $attestationStatementSupportManager = $this->getAttestationStatementSupportManager();
             $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager);
@@ -116,6 +117,27 @@ class VerifyHandler implements VerifyHandlerInterface
         }
 
         return Result::create();
+    }
+
+    /**
+     * Make authenticatorData Base64urlSafe which is expected by PublicKeyCredentialLoader::createResponse()
+     */
+    private function makeAuthenticatorDataBase64UrlSafe(array $data): array
+    {
+        try {
+            $decodedCredentials = base64_decode($data['credentials']);
+            $jsonCredientials = json_decode($decodedCredentials, true);
+            $jsonCredientials['response']['authenticatorData'] = str_replace(
+                ['+', '/', '='],
+                ['-', '_', ''],
+                $jsonCredientials['response']['authenticatorData']
+            );
+            $decodedCredentials = json_encode($jsonCredientials, JSON_UNESCAPED_SLASHES);
+            $data['credentials'] = base64_encode($decodedCredentials);
+            return $data;
+        } catch (Exception) {
+            throw new ResponseDataException('Incomplete data, required information missing');
+        }
     }
 
     /**

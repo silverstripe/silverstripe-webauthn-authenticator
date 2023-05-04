@@ -15,25 +15,11 @@ By default, we expect that this module would be used with multi-platform authent
 authenticators such as fingerprint scanners. More information on this can be found in the
 [developer documentation](docs/en/readme.md).
 
-## Requirements
-
-* Silverstripe ^4.1
-* silverstripe/mfa ^4.0
-* PHP GMP extension
-* [Yarn](https://yarnpkg.com/lang/en/), [NodeJS](https://nodejs.org/en/) (>=10) and [npm](https://npmjs.com) (for building
-  frontend assets)
-
 ## Installation
 
-Install with Composer: 
-
+```sh
+composer require silverstripe/webauthn-authenticator
 ```
-composer require silverstripe/webauthn-authenticator ^4.0
-```
-
-For Silverstripe 3.7 support please use `silverstripe/webauthn-authenticator ^3.0`.
-
-The WebAuthn authenticator module automatically configures itself when installed.
 
 ## Documentation
 

@@ -21,6 +21,7 @@ use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TrustPath\EmptyTrustPath;
+use SilverStripe\WebAuthn\ResponseDataException;
 
 class VerifyHandlerTest extends SapphireTest
 {
@@ -151,20 +152,22 @@ class VerifyHandlerTest extends SapphireTest
         $loaderMock = $this->createMock(PublicKeyCredentialLoader::class);
         $handlerMock->expects($this->once())->method('getPublicKeyCredentialLoader')->willReturn($loaderMock);
 
+        $credentials = base64_encode(json_encode(['response' => ['authenticatorData' => 'foo']]));
+
         $publicKeyCredentialMock = $this->createMock(PublicKeyCredential::class);
-        $loaderMock->expects($this->once())->method('load')->with('example')->willReturn(
+        $loaderMock->expects($this->once())->method('load')->with(base64_decode($credentials))->willReturn(
             $publicKeyCredentialMock
         );
 
         $publicKeyCredentialMock->expects($this->once())->method('getResponse')->willReturn($mockResponse);
 
-        $this->request->setBody(json_encode([
-            'credentials' => base64_encode('example'),
-        ]));
+        $this->request->setBody(json_encode(['credentials' => $credentials]));
         $result = $handlerMock->verify($this->request, $this->store, $this->registeredMethod);
 
         $this->assertSame($expectedResult->isSuccessful(), $result->isSuccessful());
         if ($expectedResult->getMessage()) {
+            $expected = $expectedResult->getMessage();
+            $actual = $result->getMessage();
             $this->assertStringContainsString($expectedResult->getMessage(), $result->getMessage());
         }
     }
@@ -204,6 +207,65 @@ class VerifyHandlerTest extends SapphireTest
                     $responseValidatorMock->expects($this->once())->method('check')
                         ->willThrowException(new Exception('I am a test'));
                 },
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideMakeAuthenticatorDataBase64UrlSafe
+    */
+    public function testMakeAuthenticatorDataBase64UrlSafe(array $data, string $expected, bool $exception)
+    {
+        $reflector = new \ReflectionClass(VerifyHandler::class);
+        $method = $reflector->getMethod('makeAuthenticatorDataBase64UrlSafe');
+        $method->setAccessible(true);
+        $instance = new VerifyHandler();
+        if ($exception) {
+            $this->expectException(ResponseDataException::class);
+            $method->invokeArgs($instance, [$data]);
+        } else {
+            $newData = $method->invokeArgs($instance, [$data]);
+            $decoded = base64_decode($newData['credentials']);
+            $json = json_decode($decoded, true);
+            $actual = $json['response']['authenticatorData'];
+            $this->assertSame($expected, $actual);
+        }
+    }
+
+    public function provideMakeAuthenticatorDataBase64UrlSafe(): array
+    {
+        $makeData = function ($authenticatorData) {
+            $a = [];
+            $a['response'] = [];
+            $a['response']['authenticatorData'] = $authenticatorData;
+            $jsonEncoded = json_encode($a, JSON_UNESCAPED_SLASHES);
+            return ['credentials' => base64_encode($jsonEncoded)];
+        };
+        return [
+            'invalid data' => [
+                'data' => [],
+                'expected' => '',
+                'exception' => true,
+            ],
+            'change none' => [
+                'data' => $makeData('abcdefghi'),
+                'expected' => 'abcdefghi',
+                'exception' => false,
+            ],
+            'change plus' => [
+                'data' => $makeData('abc+def_ghi'),
+                'expected' => 'abc-def_ghi',
+                'exception' => false,
+            ],
+            'change slash' => [
+                'credentials' => $makeData('abc-def/ghi'),
+                'expected' => 'abc-def_ghi',
+                'exception' => false,
+            ],
+            'change plus and slash' => [
+                'credentials' => $makeData('abc+def/ghi'),
+                'expected' => 'abc-def_ghi',
+                'exception' => false,
             ],
         ];
     }
