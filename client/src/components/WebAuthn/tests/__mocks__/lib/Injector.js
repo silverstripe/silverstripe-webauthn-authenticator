@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const generateHOC = name => {
+const generateHOC = (name) => {
   // Create a fake HOC to return
   const hoc = () => <div />;
   // Set the display name to the name of the given component
@@ -12,9 +12,9 @@ const generateHOC = name => {
 
 export const loadComponent = jest.fn().mockImplementation(generateHOC);
 
-export const inject = (definitions, callback) => InjectedComponent => props => (
+export const inject = (definitions, callback) => (InjectedComponent) => (props) => (
   <InjectedComponent
     {...props}
-    {...callback(...definitions.map(name => generateHOC(name)))}
+    {...callback(...definitions.map((name) => generateHOC(name)))}
   />
 );

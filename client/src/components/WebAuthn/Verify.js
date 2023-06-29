@@ -41,13 +41,13 @@ class Verify extends Component {
     const { publicKey, onCompleteVerification } = this.props;
 
     performVerification(publicKey)
-      .then(verificationData => {
+      .then((verificationData) => {
         this.setState(
           { success: true },
           () => setTimeout(
             () => { onCompleteVerification(verificationData); },
-            1000
-          )
+            1000,
+          ),
         );
       })
       .catch(() => this.setState({ failure: true }));
@@ -64,13 +64,13 @@ class Verify extends Component {
 
     const registerKeyT = i18n._t(
       'MFAWebAuthnVerify.VERIFY',
-      fallbacks['MFAWebAuthnVerify.VERIFY']
+      fallbacks['MFAWebAuthnVerify.VERIFY'],
     );
 
     // As this part of the message requires formatting, we render it using dangerouslySetInnerHTML
     const instructions = i18n.inject(
       i18n._t('MFAWebAuthnVerify.INSTRUCTION', fallbacks['MFAWebAuthnVerify.INSTRUCTION']),
-      { button: `<strong>${registerKeyT}</strong>` }
+      { button: `<strong>${registerKeyT}</strong>` },
     );
 
     return (
@@ -128,14 +128,14 @@ class Verify extends Component {
     }
 
     if (failure) {
-        return (
-          <div className="mfa-verification-container__status status-message--failure">
-            <span className="status-message__icon"><CircleWarning size="32px" /></span>
-            <span className="status-message__description">
-              {i18n._t('MFAWebAuthnVerify.FAILURE', fallbacks['MFAWebAuthnVerify.FAILURE'])}
-            </span>
-          </div>
-        );
+      return (
+        <div className="mfa-verification-container__status status-message--failure">
+          <span className="status-message__icon"><CircleWarning size="32px" /></span>
+          <span className="status-message__description">
+            {i18n._t('MFAWebAuthnVerify.FAILURE', fallbacks['MFAWebAuthnVerify.FAILURE'])}
+          </span>
+        </div>
+      );
     }
 
     return (

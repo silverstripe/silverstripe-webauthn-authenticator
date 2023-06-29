@@ -27,7 +27,7 @@ export const performRegistration = (keyData) => new Promise((resolve, reject) =>
   const { navigator } = window;
 
   navigator.credentials.create({ publicKey: parsedKey })
-    .then(response => {
+    .then((response) => {
       resolve({
         credentials: btoa(JSON.stringify({
           id: response.id,
@@ -39,7 +39,7 @@ export const performRegistration = (keyData) => new Promise((resolve, reject) =>
           },
         })),
       });
-    }).catch(error => {
+    }).catch((error) => {
       reject(error.message);
     });
 });
@@ -54,14 +54,14 @@ export const performVerification = (publicKey) => new Promise((resolve, reject) 
   const parsed = {
     ...publicKey,
     challenge: base64ToByteArray(publicKey.challenge),
-    allowCredentials: publicKey.allowCredentials.map(data => ({
+    allowCredentials: publicKey.allowCredentials.map((data) => ({
       ...data,
       id: base64ToByteArray(data.id),
     })),
   };
 
   navigator.credentials.get({ publicKey: parsed })
-    .then(response => {
+    .then((response) => {
       resolve({
         credentials: btoa(JSON.stringify({
           id: response.id,
@@ -78,7 +78,7 @@ export const performVerification = (publicKey) => new Promise((resolve, reject) 
         })),
       });
     })
-    .catch(error => {
+    .catch((error) => {
       reject(error.message);
     });
 });

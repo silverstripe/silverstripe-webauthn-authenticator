@@ -1,8 +1,8 @@
 /* global jest, test, describe, it, each, expect */
 
-import { Component as Register, VIEWS } from '../Register';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Component as Register } from '../Register';
 
 window.ss = {
   i18n: {
@@ -15,11 +15,11 @@ let resolveRegistration;
 let rejectRegistration;
 
 jest.mock('lib/auth', () => ({
-    performRegistration: () => new Promise((resolve, reject) => {
-        resolveRegistration = resolve;
-        rejectRegistration = reject;
-      })
-  }));
+  performRegistration: () => new Promise((resolve, reject) => {
+    resolveRegistration = resolve;
+    rejectRegistration = reject;
+  }),
+}));
 
 function makeProps(obj = {}) {
   return {
@@ -31,7 +31,7 @@ function makeProps(obj = {}) {
       component: 'WebAuthnRegister',
     },
     keyData: {
-      foo: 'bar'
+      foo: 'bar',
     },
     onBack: () => {},
     onCompleteRegistration: () => {},
@@ -43,9 +43,9 @@ test('Register back button triggers the onBack callback', () => {
   const onBack = jest.fn();
   const { container } = render(
     <Register {...makeProps({
-      onBack
+      onBack,
     })}
-    />
+    />,
   );
   const button = container.querySelector('.mfa-action-list__item.btn-secondary');
   expect(button.textContent).toBe('Back');
@@ -57,9 +57,9 @@ test('Register with registrationData available', async () => {
   const onCompleteRegistration = jest.fn();
   const { container } = render(
     <Register {...makeProps({
-      onCompleteRegistration
+      onCompleteRegistration,
     })}
-    />
+    />,
   );
   let button = container.querySelector('.mfa-action-list__item.btn-primary');
   expect(button.textContent).toBe('Register key');
@@ -77,9 +77,9 @@ test('Register with registrationData unavailable', async () => {
   const onCompleteRegistration = jest.fn();
   const { container } = render(
     <Register {...makeProps({
-      onCompleteRegistration
+      onCompleteRegistration,
     })}
-    />
+    />,
   );
   let button = container.querySelector('.mfa-action-list__item.btn-primary');
   expect(button.textContent).toBe('Register key');
@@ -94,7 +94,7 @@ test('Register with registrationData unavailable', async () => {
 });
 
 test('Register failure', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   let button = container.querySelector('.mfa-action-list__item.btn-primary');
   expect(button.textContent).toBe('Register key');
   fireEvent.click(button);
@@ -109,9 +109,9 @@ test('Register does not render any actions when a backend error has occurred', (
   const { container } = render(
     <Register {...makeProps({
       keyData: null,
-      errors: ['I am a unit test']
+      errors: ['I am a unit test'],
     })}
-    />
+    />,
   );
   expect(container.querySelector('.mfa-action-list__item')).toBeNull();
 });
@@ -119,22 +119,22 @@ test('Register does not render any actions when a backend error has occurred', (
 test('Register renders a disabled register button and a back button when loading', () => {
   const { container } = render(
     <Register {...makeProps({
-      keyData: null
+      keyData: null,
     })}
-    />
+    />,
   );
   expect(container.querySelector('.mfa-action-list__item.btn-primary').disabled).toBe(true);
   expect(container.querySelector('.mfa-action-list__item.btn-secondary').disabled).toBe(false);
 });
 
 test('Register renders a disabled register button and a back button when ready', () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   expect(container.querySelector('.mfa-action-list__item.btn-primary').disabled).toBe(false);
   expect(container.querySelector('.mfa-action-list__item.btn-secondary').disabled).toBe(false);
 });
 
 test('Register renders disabled registering and back buttons during registration', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   await screen.findByText('Waiting');
   expect(container.querySelector('.mfa-action-list__item.btn-primary').disabled).toBe(true);
@@ -142,7 +142,7 @@ test('Register renders disabled registering and back buttons during registration
 });
 
 test('Register renders complete registration button when registration succeeds', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   resolveRegistration({ some: 'registrationData' });
   await screen.findByText('Complete registration');
@@ -151,7 +151,7 @@ test('Register renders complete registration button when registration succeeds',
 });
 
 test('Register renders retry and back buttons when registration fails', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   rejectRegistration();
   await screen.findByText('Retry');
@@ -165,9 +165,9 @@ test('Register displays error messages if present', () => {
   const { container } = render(
     <Register {...makeProps({
       keyData: null,
-      errors: ['I am a unit test', 'Something went wrong']
+      errors: ['I am a unit test', 'Something went wrong'],
     })}
-    />
+    />,
   );
   expect(container.querySelector('.status-message__description').textContent).toBe('I am a unit test, Something went wrong');
 });
@@ -175,27 +175,27 @@ test('Register displays error messages if present', () => {
 test('Register displays waiting message when the view is loading', () => {
   const { container } = render(
     <Register {...makeProps({
-      keyData: null
+      keyData: null,
     })}
-    />
+    />,
   );
   expect(container.querySelector('.status-message__description').textContent).toBe('Waiting');
 });
 
 test('Register displays no message when the view is ready', () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   expect(container.querySelector('.status-message__description')).toBeNull();
 });
 
 test('Register displays waiting message during registration', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   await screen.findByText('Waiting');
   expect(container.querySelector('.status-message__description').textContent).toBe('Waiting');
 });
 
 test('Register displays complete message when the registration is successful', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   resolveRegistration({ some: 'registrationData' });
   await screen.findByText('Key verified');
@@ -203,7 +203,7 @@ test('Register displays complete message when the registration is successful', a
 });
 
 test('Register displays error message when the registration fails', async () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   fireEvent.click(container.querySelector('.mfa-action-list__item.btn-primary'));
   rejectRegistration();
   await screen.findByText('Retry');
@@ -211,7 +211,7 @@ test('Register displays error message when the registration fails', async () => 
 });
 
 test('Register renders the full UI', () => {
-  const { container } = render(<Register {...makeProps()}/>);
+  const { container } = render(<Register {...makeProps()} />);
   expect(container.querySelector('.mfa-registration-container__description')).not.toBeNull();
   expect(container.querySelector('.mfa-registration-container__status')).not.toBeNull();
   expect(container.querySelector('.mfa-registration-container__thumbnail')).not.toBeNull();

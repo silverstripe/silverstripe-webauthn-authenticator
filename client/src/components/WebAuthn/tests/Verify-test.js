@@ -1,8 +1,8 @@
 /* global jest, test, describe, it, each, expect */
 
-import Verify from '../Verify';
 import React from 'react';
-import { render, fireEvent, screen, act } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
+import Verify from '../Verify';
 
 window.ss = {
   i18n: {
@@ -31,13 +31,13 @@ let rejectVerification;
 
 jest.mock('lib/auth', () => ({
   performVerification: () => new Promise((resolve, reject) => {
-      resolveVerification = resolve;
-      rejectVerification = reject;
-    })
+    resolveVerification = resolve;
+    rejectVerification = reject;
+  }),
 }));
 
 test('Verify retry clears failure state', async () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   expect(container.querySelector('.status-message__description').textContent).toBe('Waiting...');
   // verification fetch is sent as soon as the component is rendered
   rejectVerification();
@@ -57,9 +57,9 @@ test('Verify performs verification then calls onCompleteVerification on success'
   const onCompleteVerification = jest.fn(() => doResolve());
   render(
     <Verify {...makeProps({
-      onCompleteVerification
+      onCompleteVerification,
     })}
-    />
+    />,
   );
   resolveVerification();
   await screen.findByText('Logging in...');
@@ -68,12 +68,12 @@ test('Verify performs verification then calls onCompleteVerification on success'
 });
 
 test('Verify renders the instructions', () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   expect(container.querySelector('.mfa-verification-container__description').textContent).toContain('Use your security key to verify your identity.');
 });
 
 test('Verify renders the help link when one is provided', () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   expect(container.querySelector('.mfa-verification-container__description').textContent).toContain('How to use security keys');
 });
 
@@ -83,9 +83,9 @@ test('Verify renders the help link when one is provided', () => {
       method: {
         ...makeProps().method,
         supportLink: null,
-      }
+      },
     })}
-    />
+    />,
   );
   expect(container.querySelector('.mfa-verification-container__description').textContent).not.toContain('How to use security keys');
 });
@@ -95,45 +95,45 @@ test('Verify handles provided errors as props', () => {
     <Verify {...makeProps({
       errors: ['I am a test', 'Hello world'],
     })}
-    />
+    />,
   );
   expect(container.querySelector('.status-message--error')).not.toBeNull();
   expect(container.querySelector('.status-message__description').textContent).toBe('I am a test, Hello world');
 });
 
 test('Verify handles a success state', async () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   resolveVerification();
   await screen.findByText('Logging in...');
   expect(container.querySelector('.status-message--success')).not.toBeNull();
 });
 
 test('Verify handles a failure state', async () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   rejectVerification();
   await screen.findByText('Try again');
   expect(container.querySelector('.status-message--failure')).not.toBeNull();
 });
 
 test('Verify defaults to a waiting state', () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   expect(container.querySelector('.status-message--loading')).not.toBeNull();
 });
 
 test('Verify renders the thumbnail from the method', () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   expect(container.querySelector('.mfa-verification-container__thumbnail')).not.toBeNull();
 });
 
 test('Verify does not render actions when in the success state', async () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   resolveVerification();
   await screen.findByText('Logging in...');
   expect(container.querySelector('.mfa-action-list__item')).toBeNull();
 });
 
 test('Verify renders a retry button when in a failure state', async () => {
-  const { container } = render(<Verify {...makeProps()}/>);
+  const { container } = render(<Verify {...makeProps()} />);
   rejectVerification();
   await screen.findByText('Try again');
   expect(container.querySelector('.mfa-action-list__item').textContent).toBe('Try again');
@@ -142,9 +142,9 @@ test('Verify renders a retry button when in a failure state', async () => {
 test('Verify renders only the "moreOptionsControl" prop provided when in waiting state', () => {
   const { container } = render(
     <Verify {...makeProps({
-        moreOptionsControl: <div className="test-more-options">Hello world</div>
+      moreOptionsControl: <div className="test-more-options">Hello world</div>,
     })}
-    />
+    />,
   );
   expect(container.querySelector('.test-more-options').textContent).toBe('Hello world');
 });

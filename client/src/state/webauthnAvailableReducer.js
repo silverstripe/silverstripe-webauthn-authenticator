@@ -15,7 +15,7 @@ export default function webauthnAvailableReducer(state = {}) {
     isAvailable = false;
     unavailableMessage = window.ss.i18n._t(
       'WebAuthnReducer.NOT_ON_HTTPS',
-      'This method can only be used over HTTPS.'
+      'This method can only be used over HTTPS.',
     );
   } else if (typeof window.AuthenticatorResponse === 'undefined') {
     // Check for the WebAuthn browser API
@@ -23,7 +23,7 @@ export default function webauthnAvailableReducer(state = {}) {
     isAvailable = false;
     unavailableMessage = window.ss.i18n._t(
       'WebAuthnReducer.UNSUPPORTED_BROWSER',
-      'Security keys are not supported by this browser'
+      'Security keys are not supported by this browser',
     );
   }
 

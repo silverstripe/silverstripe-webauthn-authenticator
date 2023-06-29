@@ -89,7 +89,7 @@ class Register extends Component {
     this.setState({ view: VIEWS.PROMPTING });
 
     performRegistration(this.props.keyData)
-      .then(registrationData => this.setState({ view: VIEWS.SUCCESS, registrationData }))
+      .then((registrationData) => this.setState({ view: VIEWS.SUCCESS, registrationData }))
       .catch(() => this.setState({ view: VIEWS.FAILURE }));
   }
 
@@ -104,13 +104,13 @@ class Register extends Component {
 
     const registerKeyT = i18n._t(
       'MFAWebAuthnRegister.REGISTER',
-      fallbacks['MFAWebAuthnRegister.REGISTER']
+      fallbacks['MFAWebAuthnRegister.REGISTER'],
     );
 
     // As this part of the message requires formatting, we render it using dangerouslySetInnerHTML
     const instructions = i18n.inject(
       i18n._t('MFAWebAuthnRegister.INSTRUCTION', fallbacks['MFAWebAuthnRegister.INSTRUCTION']),
-      { button: `<strong>${registerKeyT}</strong>` }
+      { button: `<strong>${registerKeyT}</strong>` },
     );
 
     return (
@@ -216,11 +216,11 @@ class Register extends Component {
         actions = [
           {
             action: this.handleStartRegistration,
-            name: i18n._t('MFAWebAuthnRegister.RETRY', fallbacks['MFAWebAuthnRegister.RETRY'])
+            name: i18n._t('MFAWebAuthnRegister.RETRY', fallbacks['MFAWebAuthnRegister.RETRY']),
           },
           {
             action: this.handleBack,
-            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK'])
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
           },
         ];
         break;
@@ -232,11 +232,11 @@ class Register extends Component {
         actions = [
           {
             action: this.handleStartRegistration,
-            name: i18n._t('MFAWebAuthnRegister.REGISTER', fallbacks['MFAWebAuthnRegister.REGISTER'])
+            name: i18n._t('MFAWebAuthnRegister.REGISTER', fallbacks['MFAWebAuthnRegister.REGISTER']),
           },
           {
             action: this.handleBack,
-            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK'])
+            name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
           },
         ];
         break;
@@ -246,14 +246,14 @@ class Register extends Component {
             action: this.handleStartRegistration,
             name: i18n._t(
               'MFAWebAuthnRegister.REGISTERING',
-              fallbacks['MFAWebAuthnRegister.REGISTERING']
+              fallbacks['MFAWebAuthnRegister.REGISTERING'],
             ),
-            disabled: true
+            disabled: true,
           },
           {
             action: this.handleBack,
             name: i18n._t('MFAWebAuthnRegister.BACK', fallbacks['MFAWebAuthnRegister.BACK']),
-            disabled: true
+            disabled: true,
           },
         ];
         break;
@@ -263,7 +263,7 @@ class Register extends Component {
             action: this.handleNext,
             name: i18n._t(
               'MFAWebAuthnRegister.COMPLETEREGISTRATION',
-              fallbacks['MFAWebAuthnRegister.COMPLETEREGISTRATION']
+              fallbacks['MFAWebAuthnRegister.COMPLETEREGISTRATION'],
             ),
           }];
         break;
@@ -274,7 +274,7 @@ class Register extends Component {
             action: this.handleStartRegistration,
             name: i18n._t(
               'MFAWebAuthnRegister.REGISTERING',
-              fallbacks['MFAWebAuthnRegister.REGISTERING']
+              fallbacks['MFAWebAuthnRegister.REGISTERING'],
             ),
             disabled: true,
           },
