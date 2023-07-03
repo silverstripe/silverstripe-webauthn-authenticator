@@ -1,8 +1,8 @@
 /* global jest, test, describe, it, each, expect */
 
-import Verify from '../Verify';
 import React from 'react';
-import { render, fireEvent, screen, act } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
+import Verify from '../Verify';
 
 window.ss = {
   i18n: {
@@ -31,9 +31,9 @@ let rejectVerification;
 
 jest.mock('lib/auth', () => ({
   performVerification: () => new Promise((resolve, reject) => {
-      resolveVerification = resolve;
-      rejectVerification = reject;
-    })
+    resolveVerification = resolve;
+    rejectVerification = reject;
+  })
 }));
 
 test('Verify retry clears failure state', async () => {
@@ -142,7 +142,7 @@ test('Verify renders a retry button when in a failure state', async () => {
 test('Verify renders only the "moreOptionsControl" prop provided when in waiting state', () => {
   const { container } = render(
     <Verify {...makeProps({
-        moreOptionsControl: <div className="test-more-options">Hello world</div>
+      moreOptionsControl: <div className="test-more-options">Hello world</div>
     })}
     />
   );

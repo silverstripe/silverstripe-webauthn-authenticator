@@ -1,8 +1,8 @@
 /* global jest, test, describe, it, each, expect */
 
-import { Component as Register, VIEWS } from '../Register';
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Component as Register } from '../Register';
 
 window.ss = {
   i18n: {
@@ -15,11 +15,11 @@ let resolveRegistration;
 let rejectRegistration;
 
 jest.mock('lib/auth', () => ({
-    performRegistration: () => new Promise((resolve, reject) => {
-        resolveRegistration = resolve;
-        rejectRegistration = reject;
-      })
-  }));
+  performRegistration: () => new Promise((resolve, reject) => {
+    resolveRegistration = resolve;
+    rejectRegistration = reject;
+  })
+}));
 
 function makeProps(obj = {}) {
   return {

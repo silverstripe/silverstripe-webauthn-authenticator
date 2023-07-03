@@ -128,14 +128,14 @@ class Verify extends Component {
     }
 
     if (failure) {
-        return (
-          <div className="mfa-verification-container__status status-message--failure">
-            <span className="status-message__icon"><CircleWarning size="32px" /></span>
-            <span className="status-message__description">
-              {i18n._t('MFAWebAuthnVerify.FAILURE', fallbacks['MFAWebAuthnVerify.FAILURE'])}
-            </span>
-          </div>
-        );
+      return (
+        <div className="mfa-verification-container__status status-message--failure">
+          <span className="status-message__icon"><CircleWarning size="32px" /></span>
+          <span className="status-message__description">
+            {i18n._t('MFAWebAuthnVerify.FAILURE', fallbacks['MFAWebAuthnVerify.FAILURE'])}
+          </span>
+        </div>
+      );
     }
 
     return (
