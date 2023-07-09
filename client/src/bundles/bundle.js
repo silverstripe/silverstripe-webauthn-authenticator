@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Include any legacy Entwine wrappers
 
 // Include boot entrypoint
