@@ -24,6 +24,8 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.RETRY": "Try again",
     "MFAWebAuthnVerify.SUCCESS": "Logging in...",
     "MFAWebAuthnVerify.VERIFY": "activate it",
-    "MFAWebAuthnVerify.WAITING": "Waiting..."
+    "MFAWebAuthnVerify.WAITING": "Waiting...",
+    "WebAuthnReducer.NOT_ON_HTTPS": "This method can only be used over HTTPS.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }
