@@ -24,6 +24,8 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.RETRY": "Ree provu",
     "MFAWebAuthnVerify.SUCCESS": "Ensalutas...",
     "MFAWebAuthnVerify.VERIFY": "aktivigi ĝin",
-    "MFAWebAuthnVerify.WAITING": "Atendas..."
+    "MFAWebAuthnVerify.WAITING": "Atendas...",
+    "WebAuthnReducer.NOT_ON_HTTPS": "Ĉi tiu metodo estas uzebla nur per HTTPS.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }
