@@ -185,7 +185,8 @@ class VerifyHandler implements VerifyHandlerInterface
             return $source->getPublicKeyCredentialDescriptor();
         }, $validCredentials ?? []);
 
-        $options = new PublicKeyCredentialRequestOptions(random_bytes(32), 40000);
+        $options = new PublicKeyCredentialRequestOptions((string) random_bytes(32));
+        $options->setTimeout(40000);
 
         $options->allowCredentials(...$descriptors);
         $options->setUserVerification(PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_PREFERRED);
