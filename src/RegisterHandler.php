@@ -259,7 +259,7 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
             [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
-            40000
+            $this->getAuthenticatorSelectionCriteria()
         );
         $credentialOptions->setAuthenticatorSelection($this->getAuthenticatorSelectionCriteria());
         $credentialOptions->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
@@ -282,7 +282,6 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     protected function getAuthenticatorSelectionCriteria(): AuthenticatorSelectionCriteria
     {
-        return AuthenticatorSelectionCriteria::create()
-            ->setAuthenticatorAttachment((string) $this->config()->get('authenticator_attachment'));
+        return AuthenticatorSelectionCriteria::create((string) $this->config()->get('authenticator_attachment'));
     }
 }
