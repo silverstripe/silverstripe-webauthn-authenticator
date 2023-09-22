@@ -259,8 +259,9 @@ class RegisterHandler implements RegisterHandlerInterface
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
             [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
-            40000
+            $this->getAuthenticatorSelectionCriteria()
         );
+        $credentialOptions->setTimeout(40000);
         $credentialOptions->setAuthenticatorSelection($this->getAuthenticatorSelectionCriteria());
         $credentialOptions->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
 
