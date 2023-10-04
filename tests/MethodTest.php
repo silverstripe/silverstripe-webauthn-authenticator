@@ -42,7 +42,7 @@ class MethodTest extends SapphireTest
         $method = new Method();
         $method->applyRequirements();
 
-        $this->assertCount(1, Requirements::backend()->getJavascript());
+        $this->assertcount(2, Requirements::backend()->getJavascript());
         $this->assertCount(1, Requirements::backend()->getCSS());
     }
 
