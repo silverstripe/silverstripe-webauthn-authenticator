@@ -74,6 +74,7 @@ class Method implements MethodInterface
      */
     public function applyRequirements(): void
     {
+        Requirements::add_i18n_javascript('silverstripe/webauthn-authenticator: client/lang');
         Requirements::javascript('silverstripe/webauthn-authenticator: client/dist/js/bundle.js');
         Requirements::css('silverstripe/webauthn-authenticator: client/dist/styles/bundle.css');
     }
