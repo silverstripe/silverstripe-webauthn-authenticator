@@ -24,6 +24,8 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.RETRY": "Try again",
     "MFAWebAuthnVerify.SUCCESS": "Logging in...",
     "MFAWebAuthnVerify.VERIFY": "activate it",
-    "MFAWebAuthnVerify.WAITING": "Waiting..."
+    "MFAWebAuthnVerify.WAITING": "Waiting...",
+    "WebAuthnReducer.NOT_ON_HTTPS": "Den här metoden kan enbart användas via HTTPS",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }

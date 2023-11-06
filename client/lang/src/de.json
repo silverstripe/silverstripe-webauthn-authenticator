@@ -17,5 +17,7 @@
     "MFAWebAuthnVerify.RETRY": "Erneut versuchen",
     "MFAWebAuthnVerify.SUCCESS": "Anmelden...",
     "MFAWebAuthnVerify.VERIFY": "activate it",
-    "MFAWebAuthnVerify.WAITING": "Warten"
+    "MFAWebAuthnVerify.WAITING": "Warten",
+    "WebAuthnReducer.NOT_ON_HTTPS": "Diese Methode kann nur über HTTPS verwendet werden.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 }

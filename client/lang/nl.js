@@ -24,6 +24,8 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.RETRY": "Opnieuw proberen",
     "MFAWebAuthnVerify.SUCCESS": "Inloggen...",
     "MFAWebAuthnVerify.VERIFY": "verrifieer",
-    "MFAWebAuthnVerify.WAITING": "Wachten..."
+    "MFAWebAuthnVerify.WAITING": "Wachten...",
+    "WebAuthnReducer.NOT_ON_HTTPS": "Dit kan alleen gebruikt worden met HTTPS.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }
