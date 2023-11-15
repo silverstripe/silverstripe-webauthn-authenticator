@@ -24,6 +24,7 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.RETRY": "Prøv igen",
     "MFAWebAuthnVerify.SUCCESS": "Logger ind...",
     "MFAWebAuthnVerify.VERIFY": "aktiver den",
-    "MFAWebAuthnVerify.WAITING": "Venter..."
+    "MFAWebAuthnVerify.WAITING": "Venter...",
+    "WebAuthnReducer.NOT_ON_HTTPS": "Denne metode kan kun benyttes over HTTPS."
 });
 }
