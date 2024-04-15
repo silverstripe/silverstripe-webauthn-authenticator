@@ -17,13 +17,13 @@ authenticators such as fingerprint scanners. More information on this can be fou
 
 ## Installation
 
-```sh
+```bash
 composer require silverstripe/webauthn-authenticator
 ```
 
 ## Documentation
 
-For detailed developer and CMS user documentation, see [the documentation readme](docs/en/readme.md).
+Read the [WebAuthn authenticator documentation](https://docs.silverstripe.org/en/optional_features/mfa/authentictors/webauthn).
 
 ## License
 
