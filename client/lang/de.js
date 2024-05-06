@@ -14,6 +14,7 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnRegister.INSTRUCTION": "Sicherheitsschlüssel einführen und {Button} drücken",
     "MFAWebAuthnRegister.REGISTER": "Schlüssel registrieren",
     "MFAWebAuthnRegister.REGISTERING": "Registrierung",
+    "MFAWebAuthnRegister.RETRY": "Retry",
     "MFAWebAuthnRegister.SUCCESS": "Schlüssel geprüft",
     "MFAWebAuthnRegister.WAITING": "Warten",
     "MFAWebAuthnVerify.DESCRIPTION": "Verwenden Sie Ihren Sicherheitsschlüssel, um Ihre Identität zu überprüfen.",
@@ -22,7 +23,9 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.INSTRUCTION": "Bitte geben Sie Ihren Sicherheitsschlüssel und {Button} ein.",
     "MFAWebAuthnVerify.RETRY": "Erneut versuchen",
     "MFAWebAuthnVerify.SUCCESS": "Anmelden...",
+    "MFAWebAuthnVerify.VERIFY": "activate it",
     "MFAWebAuthnVerify.WAITING": "Warten",
-    "WebAuthnReducer.NOT_ON_HTTPS": "Diese Methode kann nur über HTTPS verwendet werden."
+    "WebAuthnReducer.NOT_ON_HTTPS": "Diese Methode kann nur über HTTPS verwendet werden.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }

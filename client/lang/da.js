@@ -25,6 +25,7 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.SUCCESS": "Logger ind...",
     "MFAWebAuthnVerify.VERIFY": "aktiver den",
     "MFAWebAuthnVerify.WAITING": "Venter...",
-    "WebAuthnReducer.NOT_ON_HTTPS": "Denne metode kan kun benyttes over HTTPS."
+    "WebAuthnReducer.NOT_ON_HTTPS": "Denne metode kan kun benyttes over HTTPS.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Security keys are not supported by this browser"
 });
 }
