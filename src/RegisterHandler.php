@@ -72,9 +72,9 @@ class RegisterHandler implements RegisterHandlerInterface
      * Sets the {@see $logger} member variable
      *
      * @param LoggerInterface|null $logger
-     * @return self
+     * @return RegisterHandler
      */
-    public function setLogger(?LoggerInterface $logger): self
+    public function setLogger(?LoggerInterface $logger): RegisterHandler
     {
         $this->logger = $logger;
         return $this;
