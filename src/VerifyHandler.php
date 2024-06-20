@@ -47,9 +47,9 @@ class VerifyHandler implements VerifyHandlerInterface
      * Sets the {@see $logger} member variable
      *
      * @param LoggerInterface|null $logger
-     * @return self
+     * @return VerifyHandler
      */
-    public function setLogger(?LoggerInterface $logger): self
+    public function setLogger(?LoggerInterface $logger): VerifyHandler
     {
         $this->logger = $logger;
         return $this;

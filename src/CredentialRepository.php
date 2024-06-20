@@ -189,7 +189,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
      * @param string $memberID
      * @return CredentialRepository
      */
-    public static function fromArray(array $credentials, string $memberID): self
+    public static function fromArray(array $credentials, string $memberID): CredentialRepository
     {
         $new = new static($memberID);
         $new->setCredentials($credentials);
