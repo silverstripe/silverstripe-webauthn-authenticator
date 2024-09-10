@@ -22,6 +22,7 @@ use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 use Cose\Algorithm\Signature\ECDSA\ES256;
+use Error;
 
 class VerifyHandler implements VerifyHandlerInterface
 {
@@ -125,6 +126,10 @@ class VerifyHandler implements VerifyHandlerInterface
     private function makeAuthenticatorDataBase64UrlSafe(array $data): array
     {
         try {
+            if (!array_key_exists('credentials', $data)) {
+                // this wil be immediately caught in the catch block below()
+                throw new Exception();
+            }
             $decodedCredentials = base64_decode($data['credentials']);
             $jsonCredientials = json_decode($decodedCredentials, true);
             $jsonCredientials['response']['authenticatorData'] = str_replace(

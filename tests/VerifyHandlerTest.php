@@ -22,6 +22,7 @@ use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TrustPath\EmptyTrustPath;
 use SilverStripe\WebAuthn\ResponseDataException;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class VerifyHandlerTest extends SapphireTest
 {
@@ -123,8 +124,8 @@ class VerifyHandlerTest extends SapphireTest
      * @param AuthenticatorResponse $mockResponse
      * @param Result $expectedResult
      * @param callable $responseValidatorMockCallback
-     * @dataProvider verifyProvider
      */
+    #[DataProvider('verifyProvider')]
     public function testVerify(
         $mockResponse,
         $expectedResult,
@@ -132,7 +133,7 @@ class VerifyHandlerTest extends SapphireTest
     ) {
         /** @var VerifyHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(VerifyHandler::class)
-            ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAssertionResponseValidator'])
+            ->onlyMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAssertionResponseValidator'])
             ->getMock();
 
         $publicKeyCredentialSourceMock = $this->createMock(PublicKeyCredentialSource::class);
@@ -178,21 +179,22 @@ class VerifyHandlerTest extends SapphireTest
      *
      * @return array[]
      */
-    public function verifyProvider()
+    public static function verifyProvider()
     {
+        $testCase = new VerifyHandlerTest('MyTestCase');
         return [
             'wrong response return type' => [
                 // Deliberately the wrong child implementation of \Webauthn\AuthenticatorResponse
-                $this->createMock(AuthenticatorAttestationResponse::class),
+                $testCase->createMock(AuthenticatorAttestationResponse::class),
                 new Result(false, 'Unexpected response type found'),
             ],
             'valid response' => [
-                $this->createMock(AuthenticatorAssertionResponse::class),
+                $testCase->createMock(AuthenticatorAssertionResponse::class),
                 new Result(true),
-                function (MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) use ($testCase) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock
-                        ->expects($this->once())
+                        ->expects($testCase->once())
                         ->method('check')
                         ->willReturnCallback(function (): bool {
                             return true;
@@ -200,11 +202,11 @@ class VerifyHandlerTest extends SapphireTest
                 },
             ],
             'invalid response' => [
-                $this->createMock(AuthenticatorAssertionResponse::class),
+                $testCase->createMock(AuthenticatorAssertionResponse::class),
                 new Result(false, 'I am a test'),
-                function (MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) use ($testCase) {
                     // Specifically setting expectations for the result of the response validator's "check" call
-                    $responseValidatorMock->expects($this->once())->method('check')
+                    $responseValidatorMock->expects($testCase->once())->method('check')
                         ->willThrowException(new Exception('I am a test'));
                 },
             ],
@@ -212,8 +214,8 @@ class VerifyHandlerTest extends SapphireTest
     }
 
     /**
-     * @dataProvider provideMakeAuthenticatorDataBase64UrlSafe
     */
+    #[DataProvider('provideMakeAuthenticatorDataBase64UrlSafe')]
     public function testMakeAuthenticatorDataBase64UrlSafe(array $data, string $expected, bool $exception)
     {
         $reflector = new \ReflectionClass(VerifyHandler::class);
@@ -232,7 +234,7 @@ class VerifyHandlerTest extends SapphireTest
         }
     }
 
-    public function provideMakeAuthenticatorDataBase64UrlSafe(): array
+    public static function provideMakeAuthenticatorDataBase64UrlSafe(): array
     {
         $makeData = function ($authenticatorData) {
             $a = [];
@@ -258,12 +260,12 @@ class VerifyHandlerTest extends SapphireTest
                 'exception' => false,
             ],
             'change slash' => [
-                'credentials' => $makeData('abc-def/ghi'),
+                'data' => $makeData('abc-def/ghi'),
                 'expected' => 'abc-def_ghi',
                 'exception' => false,
             ],
             'change plus and slash' => [
-                'credentials' => $makeData('abc+def/ghi'),
+                'data' => $makeData('abc+def/ghi'),
                 'expected' => 'abc-def_ghi',
                 'exception' => false,
             ],
