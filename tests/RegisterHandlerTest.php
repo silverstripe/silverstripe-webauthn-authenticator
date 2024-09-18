@@ -26,6 +26,8 @@ use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TrustPath\EmptyTrustPath;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 class RegisterHandlerTest extends SapphireTest
 {
@@ -88,8 +90,8 @@ class RegisterHandlerTest extends SapphireTest
     /**
      * @param string $baseUrl
      * @param string $expected
-     * @dataProvider hostProvider
      */
+    #[DataProvider('hostProvider')]
     public function testRelyingPartyEntityDomainIncludesSilverStripeDomain(string $baseUrl, string $expected)
     {
         $_SERVER['HTTP_HOST'] = $baseUrl;
@@ -112,7 +114,7 @@ class RegisterHandlerTest extends SapphireTest
     /**
      * @return array
      */
-    public function hostProvider(): array
+    public static function hostProvider(): array
     {
         return [
             'domain only' => ['http://example.com', 'example.com'],
@@ -167,8 +169,8 @@ class RegisterHandlerTest extends SapphireTest
      * @param int $expectedCredentialCount
      * @param callable $responseValidatorMockCallback
      * @throws Exception
-     * @dataProvider registerProvider
      */
+    #[DataProvider('registerProvider')]
     public function testRegister(
         $mockResponse,
         $expectedResult,
@@ -178,7 +180,7 @@ class RegisterHandlerTest extends SapphireTest
     ) {
         /** @var RegisterHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(RegisterHandler::class)
-            ->setMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAttestationResponseValidator'])
+            ->onlyMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAttestationResponseValidator'])
             ->getMock();
 
         $publicKeyCredentialSourceMock = $this->createMock(PublicKeyCredentialSource::class);
@@ -233,7 +235,7 @@ class RegisterHandlerTest extends SapphireTest
      *
      * @return array[]
      */
-    public function registerProvider()
+    public static function registerProvider()
     {
         // phpcs:disable
         $testSource = PublicKeyCredentialSource::createFromArray([
@@ -253,27 +255,27 @@ class RegisterHandlerTest extends SapphireTest
             'counter' => 123456789,
         ]);
         // phpcs:enable
-
-        $authDataMock = $this->createMock(AuthenticatorData::class);
-        $authDataMock->expects($this->exactly(4))->method('hasAttestedCredentialData')
+        $testCase = new RegisterHandlerTest('MyTestCase');
+        $authDataMock = $testCase->createMock(AuthenticatorData::class);
+        $authDataMock->expects($testCase->exactly(4))->method('hasAttestedCredentialData')
             // The first call is the "response indicates incomplete data" test case, second is "valid response",
             // third is "invalid response"
             ->willReturnOnConsecutiveCalls(false, true, true, true);
-        $authDataMock->expects($this->any())->method('getAttestedCredentialData')->willReturn(
+        $authDataMock->expects($testCase->any())->method('getAttestedCredentialData')->willReturn(
             $testSource->getAttestedCredentialData()
         );
-        $authDataMock->expects($this->any())->method('getSignCount')->willReturn(1);
+        $authDataMock->expects($testCase->any())->method('getSignCount')->willReturn(1);
 
-        $attestationMock = $this->createMock(AttestationObject::class);
-        $attestationMock->expects($this->any())->method('getAuthData')->willReturn($authDataMock);
+        $attestationMock = $testCase->createMock(AttestationObject::class);
+        $attestationMock->expects($testCase->any())->method('getAuthData')->willReturn($authDataMock);
 
-        $responseMock = $this->createMock(AuthenticatorAttestationResponse::class);
-        $responseMock->expects($this->any())->method('getAttestationObject')->willReturn($attestationMock);
+        $responseMock = $testCase->createMock(AuthenticatorAttestationResponse::class);
+        $responseMock->expects($testCase->any())->method('getAttestationObject')->willReturn($attestationMock);
 
         return [
             'wrong response return type' => [
                 // Deliberately the wrong child implementation of \Webauthn\AuthenticatorResponse
-                $this->createMock(AuthenticatorAssertionResponse::class),
+                $testCase->createMock(AuthenticatorAssertionResponse::class),
                 new Result(false, 'Unexpected response type found'),
                 0,
             ],
@@ -286,10 +288,10 @@ class RegisterHandlerTest extends SapphireTest
                 $responseMock,
                 new Result(true),
                 1,
-                function (MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) use ($testCase) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock
-                        ->expects($this->once())
+                        ->expects($testCase->once())
                         ->method('check')
                         ->willReturnCallback(function (): bool {
                             return true;
@@ -300,10 +302,10 @@ class RegisterHandlerTest extends SapphireTest
                 $responseMock,
                 new Result(true),
                 1,
-                function (MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) use ($testCase) {
                     // Specifically setting expectations for the result of the response validator's "check" call
                     $responseValidatorMock
-                        ->expects($this->once())
+                        ->expects($testCase->once())
                         ->method('check')
                         ->willReturnCallback(function (): bool {
                             return true;
@@ -336,9 +338,9 @@ class RegisterHandlerTest extends SapphireTest
                 $responseMock,
                 new Result(false, 'I am a test'),
                 0,
-                function (MockObject $responseValidatorMock) {
+                function (MockObject $responseValidatorMock) use ($testCase) {
                     // Specifically setting expectations for the result of the response validator's "check" call
-                    $responseValidatorMock->expects($this->once())->method('check')
+                    $responseValidatorMock->expects($testCase->once())->method('check')
                         ->willThrowException(new Exception('I am a test'));
                 },
             ],
