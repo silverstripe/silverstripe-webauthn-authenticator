@@ -1,7 +1,6 @@
 # Silverstripe WebAuthn Authenticator
 
 [![CI](https://github.com/silverstripe/silverstripe-webauthn-authenticator/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/silverstripe-webauthn-authenticator/actions/workflows/ci.yml)
-[![Silverstripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
 The silverstripe/webauthn-authenticator module provides a [Web Authentication (WebAuthn)](https://webauthn.guide/)
 authentication method for the [silverstripe/mfa module](https://github.com/silverstripe/silverstripe-mfa), which
