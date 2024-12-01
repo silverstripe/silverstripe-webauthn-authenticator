@@ -129,7 +129,7 @@ class VerifyHandlerTest extends SapphireTest
     public function testVerify(
         $mockResponse,
         $expectedResult,
-        callable $responseValidatorMockCallback = null
+        ?callable $responseValidatorMockCallback = null
     ) {
         /** @var VerifyHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(VerifyHandler::class)

@@ -165,7 +165,7 @@ class VerifyHandler implements VerifyHandlerInterface
      */
     protected function getCredentialRequestOptions(
         StoreInterface $store,
-        RegisteredMethod $registeredMethod = null,
+        ?RegisteredMethod $registeredMethod = null,
         $reset = false
     ): PublicKeyCredentialRequestOptions {
         $state = $store->getState();
