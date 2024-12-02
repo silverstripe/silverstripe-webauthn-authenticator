@@ -175,8 +175,8 @@ class RegisterHandlerTest extends SapphireTest
         $mockResponse,
         $expectedResult,
         $expectedCredentialCount,
-        callable $responseValidatorMockCallback = null,
-        callable $storeModifier = null
+        ?callable $responseValidatorMockCallback = null,
+        ?callable $storeModifier = null
     ) {
         /** @var RegisterHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(RegisterHandler::class)

@@ -19,7 +19,7 @@ trait CredentialRepositoryProviderTrait
      */
     protected function getCredentialRepository(
         StoreInterface $store,
-        RegisteredMethod $registeredMethod = null
+        ?RegisteredMethod $registeredMethod = null
     ): CredentialRepository {
         $state = $store->getState();
 
