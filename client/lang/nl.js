@@ -11,7 +11,7 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnRegister.DESCRIPTION": "Neem contact op het beheerder indien u een beveiligings sleutel nodig heeft. ",
     "MFAWebAuthnRegister.FAILURE": "Er is iets misgegaan. Sluit de sleutel opnieuw aan en probeer opnieuw",
     "MFAWebAuthnRegister.HELP": "Over het gebruik van beveiligingssleutels",
-    "MFAWebAuthnRegister.INSTRUCTION": "Sleutel invoeren en druk op {button}",
+    "MFAWebAuthnRegister.INSTRUCTION": "Voer je beveiligingssleutel in en {button} deze",
     "MFAWebAuthnRegister.REGISTER": "Sleutel aanmaken",
     "MFAWebAuthnRegister.REGISTERING": "Registreren",
     "MFAWebAuthnRegister.RETRY": "Opnieuw proberen",
@@ -20,11 +20,12 @@ if (typeof(ss) === 'undefined' || typeof(ss.i18n) === 'undefined') {
     "MFAWebAuthnVerify.DESCRIPTION": "Gebruik de beveiligingssleutel om verder te gaan.",
     "MFAWebAuthnVerify.FAILURE": "Er is iets misgegaan. Sluit de sleutel opnieuw aan en probeer opnieuw",
     "MFAWebAuthnVerify.HELP": "Over het gebruik van beveiligingssleutels",
-    "MFAWebAuthnVerify.INSTRUCTION": "Sleutel invoeren en druk op {button}",
+    "MFAWebAuthnVerify.INSTRUCTION": "Voer sleutel in en {button}",
     "MFAWebAuthnVerify.RETRY": "Opnieuw proberen",
     "MFAWebAuthnVerify.SUCCESS": "Inloggen...",
-    "MFAWebAuthnVerify.VERIFY": "verrifieer",
+    "MFAWebAuthnVerify.VERIFY": "activeer",
     "MFAWebAuthnVerify.WAITING": "Wachten...",
-    "WebAuthnReducer.NOT_ON_HTTPS": "Dit kan alleen gebruikt worden met HTTPS."
+    "WebAuthnReducer.NOT_ON_HTTPS": "Dit kan alleen gebruikt worden met HTTPS.",
+    "WebAuthnReducer.UNSUPPORTED_BROWSER": "Beveiligingssleutels worden niet ondersteund in deze browser."
 });
 }
