@@ -6,18 +6,25 @@ namespace SilverStripe\WebAuthn;
 
 use InvalidArgumentException;
 use Serializable;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestedCredentialData;
-use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialSourceRepository;
+use Webauthn\CredentialRecord;
+use Webauthn\Denormalizer\WebauthnSerializerFactory;
 use Webauthn\PublicKeyCredentialUserEntity;
+use Webauthn\TrustPath\CertificateTrustPath;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 /**
- * Implements the required interface from the WebAuthn library - but it does not implement the repository pattern in the
- * usual way. This is expected to be stored on a DataObject for persistence. Use the
+ * Holds the credentials of one member. webauthn-lib 5 no longer has a repository interface (webauthn-lib 4 had
+ * PublicKeyCredentialSourceRepository, which this class implemented); the method names are kept. It does not
+ * implement the repository pattern in the usual way. This is expected to be stored on a DataObject for persistence.
+ * Use the
  * @see CredentialRepository::hasChanged() API for determining whether a DataObject this is stored upon should be
  * persisted.
  */
-class CredentialRepository implements PublicKeyCredentialSourceRepository
+class CredentialRepository
 {
     /**
      * @var string
@@ -88,7 +95,7 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
         }
     }
 
-    public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    public function findOneByCredentialId(string $publicKeyCredentialId): ?CredentialRecord
     {
         $ref = $this->getCredentialIDRef($publicKeyCredentialId);
         if (!isset($this->credentials[$ref])) {
@@ -99,12 +106,12 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
     }
 
     /**
-     * @return PublicKeyCredentialSource[]
+     * @return CredentialRecord[]
      */
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
         // Only return credentials if the user entity shares the same ID.
-        if ($publicKeyCredentialUserEntity->getId() !== $this->memberID) {
+        if ($publicKeyCredentialUserEntity->id !== $this->memberID) {
             return [];
         }
 
@@ -113,9 +120,9 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
         }, $this->credentials ?? []);
     }
 
-    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
+    public function saveCredentialSource(CredentialRecord $publicKeyCredentialSource): void
     {
-        $ref = $this->getCredentialIDRef($publicKeyCredentialSource->getPublicKeyCredentialId());
+        $ref = $this->getCredentialIDRef($publicKeyCredentialSource->publicKeyCredentialId);
 
         if (!isset($this->credentials[$ref])) {
             $this->credentials[$ref] = [
@@ -155,7 +162,9 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
     {
         $this->credentials = array_map(function ($data) {
             if (is_array($data['source'])) {
-                $data['source'] = PublicKeyCredentialSource::createFromArray($data['source']);
+                # Stored data (RegisteredMethod.Data) keeps the webauthn-lib 4 JSON shape; webauthn-lib 5 reads it
+                # through its CredentialRecordDenormalizer (see toArray())
+                $data['source'] = static::getSerializer()->denormalize($data['source'], CredentialRecord::class);
             }
             return $data;
         }, $credentials ?? []);
@@ -179,7 +188,48 @@ class CredentialRepository implements PublicKeyCredentialSourceRepository
      */
     public function toArray(): array
     {
-        return $this->credentials;
+        # webauthn-lib 4 objects serialised themselves to JSON (JsonSerializable); webauthn-lib 5 objects do not, so
+        # a plain json_encode() of them (silverstripe/mfa stores the register result that way) would lose the
+        # credential. Normalise each source to an array instead.
+        return array_map(function ($data) {
+            if ($data['source'] instanceof CredentialRecord) {
+                $data['source'] = static::normaliseSource($data['source']);
+            }
+            return $data;
+        }, $this->credentials ?? []);
+    }
+
+    /**
+     * The webauthn-lib 5 normalised form of a credential, in the JSON shape webauthn-lib 4 wrote.
+     *
+     * webauthn-lib 5 writes the trust path without its "type" key. webauthn-lib 4.4 to 4.8 need that key to read it
+     * back (TrustPathLoader: "The trust path type is missing"); 4.9 reads both forms. 4.4.3 is what projects fall
+     * back to when Composer blocks 4.9.x for its advisories. The key is added again, so data written after an upgrade
+     * still loads if a site has to roll back. webauthn-lib 5 reads both forms (TrustPathDenormalizer).
+     *
+     * @param CredentialRecord $source
+     * @return array
+     */
+    protected static function normaliseSource(CredentialRecord $source): array
+    {
+        $normalised = static::getSerializer()->normalize($source);
+        if ($source->trustPath instanceof CertificateTrustPath) {
+            $normalised['trustPath'] = ['type' => CertificateTrustPath::class] + $normalised['trustPath'];
+        } elseif ($source->trustPath instanceof EmptyTrustPath) {
+            $normalised['trustPath'] = ['type' => EmptyTrustPath::class];
+        }
+        return $normalised;
+    }
+
+    /**
+     * Reads and writes stored credentials. No attestation formats are involved here, so the default support manager
+     * is enough.
+     *
+     * @return NormalizerInterface&DenormalizerInterface
+     */
+    protected static function getSerializer()
+    {
+        return (new WebauthnSerializerFactory(AttestationStatementSupportManager::create()))->create();
     }
 
     /**

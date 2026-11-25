@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace SilverStripe\WebAuthn;
 
-use Webauthn\AttestationStatement\AttestationObjectLoader;
+use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\FidoU2FAttestationStatementSupport;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
-use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\Denormalizer\WebauthnSerializerFactory;
 
 /**
  * Contains logic which is shared between both WebAuthn's RegisterHandler and VerifyHandler, such as
@@ -21,29 +22,38 @@ trait BaseHandlerTrait
      */
     protected function getAttestationStatementSupportManager(): AttestationStatementSupportManager
     {
-        $manager = new AttestationStatementSupportManager();
-        $manager->add(new NoneAttestationStatementSupport());
-        $manager->add(new FidoU2FAttestationStatementSupport());
-        return $manager;
+        return AttestationStatementSupportManager::create([
+            new NoneAttestationStatementSupport(),
+            new FidoU2FAttestationStatementSupport(),
+        ]);
     }
 
     /**
+     * webauthn-lib 5 reads the browser's credential JSON through a Symfony serializer; it replaces the
+     * PublicKeyCredentialLoader and AttestationObjectLoader of webauthn-lib 4.
+     *
      * @param AttestationStatementSupportManager $attestationStatementSupportManager
-     * @return AttestationObjectLoader
+     * @return SerializerInterface
      */
-    protected function getAttestationObjectLoader(
+    protected function getSerializer(
         AttestationStatementSupportManager $attestationStatementSupportManager
-    ): AttestationObjectLoader {
-        return new AttestationObjectLoader($attestationStatementSupportManager);
+    ): SerializerInterface {
+        return (new WebauthnSerializerFactory($attestationStatementSupportManager))->create();
     }
 
     /**
-     * @param AttestationObjectLoader $attestationObjectLoader
-     * @return PublicKeyCredentialLoader
+     * webauthn-lib 5 configures the registration and login checks through a ceremony step manager; it
+     * replaces the validator constructor arguments of webauthn-lib 4 (token binding handler, extension
+     * output checker, algorithm manager).
+     *
+     * @param AttestationStatementSupportManager $attestationStatementSupportManager
+     * @return CeremonyStepManagerFactory
      */
-    protected function getPublicKeyCredentialLoader(
-        AttestationObjectLoader $attestationObjectLoader
-    ): PublicKeyCredentialLoader {
-        return new PublicKeyCredentialLoader($attestationObjectLoader);
+    protected function getCeremonyStepManagerFactory(
+        AttestationStatementSupportManager $attestationStatementSupportManager
+    ): CeremonyStepManagerFactory {
+        $factory = new CeremonyStepManagerFactory();
+        $factory->setAttestationStatementSupportManager($attestationStatementSupportManager);
+        return $factory;
     }
 }
