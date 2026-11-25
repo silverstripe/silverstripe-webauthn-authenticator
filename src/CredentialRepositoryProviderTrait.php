@@ -58,7 +58,7 @@ trait CredentialRepositoryProviderTrait
      */
     protected function getUserEntity(Member $member): PublicKeyCredentialUserEntity
     {
-        return new PublicKeyCredentialUserEntity(
+        return PublicKeyCredentialUserEntity::create(
             $member->getName(),
             (string) $member->ID,
             $member->getName()

@@ -6,8 +6,10 @@ namespace SilverStripe\WebAuthn;
 
 use Cose\Algorithms;
 use Exception;
+use TypeError;
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
@@ -17,16 +19,13 @@ use SilverStripe\MFA\State\Result;
 use SilverStripe\MFA\Store\StoreInterface;
 use SilverStripe\SiteConfig\SiteConfig;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
-use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
-use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialParameters;
+use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialSource;
-use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 
 class RegisterHandler implements RegisterHandlerInterface
 {
@@ -93,7 +92,10 @@ class RegisterHandler implements RegisterHandlerInterface
         $options = $this->getCredentialCreationOptions($store, true);
 
         return [
-            'keyData' => $options,
+            # webauthn-lib 5 options are not JsonSerializable; normalise them to the JSON the browser expects,
+            # without null members (they would reach navigator.credentials as the string "null")
+            'keyData' => $this->getSerializer($this->getAttestationStatementSupportManager())
+                ->normalize($options, 'json', [AbstractObjectNormalizer::SKIP_NULL_VALUES => true]),
         ];
     }
 
@@ -117,16 +119,18 @@ class RegisterHandler implements RegisterHandlerInterface
             }
 
             $attestationStatementSupportManager = $this->getAttestationStatementSupportManager();
-            $attestationObjectLoader = $this->getAttestationObjectLoader($attestationStatementSupportManager);
-            $publicKeyCredentialLoader = $this->getPublicKeyCredentialLoader($attestationObjectLoader);
-            $publicKeyCredential = $publicKeyCredentialLoader->load(base64_decode($data['credentials'] ?? ''));
-            $response = $publicKeyCredential->getResponse();
+            $publicKeyCredential = $this->getSerializer($attestationStatementSupportManager)->deserialize(
+                base64_decode($data['credentials'] ?? ''),
+                PublicKeyCredential::class,
+                'json'
+            );
+            $response = $publicKeyCredential->response;
 
             if (!$response instanceof AuthenticatorAttestationResponse) {
                 throw new ResponseTypeException('Unexpected response type found');
             }
 
-            if (!$response->getAttestationObject()->getAuthData()->hasAttestedCredentialData()) {
+            if (!$response->attestationObject->authData->hasAttestedCredentialData()) {
                 throw new ResponseDataException('Incomplete data, required information missing');
             }
 
@@ -136,8 +140,16 @@ class RegisterHandler implements RegisterHandlerInterface
             // Validate the webauthn response
             $publicKeyCredentialSource = $this
                 ->getAuthenticatorAttestationResponseValidator($attestationStatementSupportManager, $store)
-                ->check($response, $options, $psrRequest);
-        } catch (Exception $e) {
+                ->check($response, $options, $psrRequest->getUri()->getHost());
+
+            # webauthn-lib 4.4 refused a credential ID the repository already held (4.9 had dropped that check);
+            # webauthn-lib 5 leaves it to the application
+            # (https://www.w3.org/TR/webauthn-3/#reg-ceremony-verify-credential-id)
+            if ($this->getCredentialRepository($store)->has($publicKeyCredentialSource->publicKeyCredentialId)) {
+                throw new ResponseDataException('The credential ID is already registered');
+            }
+        # webauthn-lib 5's strict denormalizers throw TypeError on badly typed input: a failed result, as with 4.x
+        } catch (Exception | TypeError $e) {
             $this->logger->error($e->getMessage());
             return Result::create(false, 'Registration failed: ' . $e->getMessage());
         }
@@ -163,13 +175,10 @@ class RegisterHandler implements RegisterHandlerInterface
         AttestationStatementSupportManager $attestationStatementSupportManager,
         StoreInterface $store
     ): AuthenticatorAttestationResponseValidator {
-        $credentialRepository = $this->getCredentialRepository($store);
-
-        return new AuthenticatorAttestationResponseValidator(
-            $attestationStatementSupportManager,
-            $credentialRepository,
-            new TokenBindingNotSupportedHandler(),
-            new ExtensionOutputCheckerHandler()
+        # webauthn-lib 5: no credential repository, token binding handler or extension checker arguments any more;
+        # the checks are configured through the ceremony steps (BaseHandlerTrait::getCeremonyStepManagerFactory())
+        return AuthenticatorAttestationResponseValidator::create(
+            $this->getCeremonyStepManagerFactory($attestationStatementSupportManager)->creationCeremony()
         );
     }
 
@@ -227,7 +236,7 @@ class RegisterHandler implements RegisterHandlerInterface
         // See https://github.com/web-auth/webauthn-framework/blob/v1.2.2/doc/webauthn/PublicKeyCredentialCreation.md#relying-party-entity
         $host = parse_url(Director::host() ?? '', PHP_URL_HOST);
 
-        return new PublicKeyCredentialRpEntity(
+        return PublicKeyCredentialRpEntity::create(
             (string) SiteConfig::current_site_config()->Title,
             $host,
             static::config()->get('application_logo')
@@ -254,16 +263,16 @@ class RegisterHandler implements RegisterHandlerInterface
             return $state['credentialOptions'];
         }
 
-        $credentialOptions = new PublicKeyCredentialCreationOptions(
+        # webauthn-lib 5 options are immutable: everything the setters of webauthn-lib 4 set goes into create()
+        $credentialOptions = PublicKeyCredentialCreationOptions::create(
             $this->getRelyingPartyEntity(),
             $this->getUserEntity($store->getMember()),
             random_bytes(32),
-            [new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256)],
-            $this->getAuthenticatorSelectionCriteria()
+            [PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES256)],
+            authenticatorSelection: $this->getAuthenticatorSelectionCriteria(),
+            attestation: PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
+            timeout: 40000
         );
-        $credentialOptions->setTimeout(40000);
-        $credentialOptions->setAuthenticatorSelection($this->getAuthenticatorSelectionCriteria());
-        $credentialOptions->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
 
         $store->setState(['credentialOptions' => $credentialOptions] + $state);
 
@@ -283,7 +292,10 @@ class RegisterHandler implements RegisterHandlerInterface
      */
     protected function getAuthenticatorSelectionCriteria(): AuthenticatorSelectionCriteria
     {
-        return AuthenticatorSelectionCriteria::create()
-            ->setAuthenticatorAttachment((string) $this->config()->get('authenticator_attachment'));
+        # null (no preference: allow platform and cross-platform keys) must stay null: webauthn-lib 5 only accepts
+        # null, 'platform' or 'cross-platform' and throws on the empty string a (string) cast would give
+        return AuthenticatorSelectionCriteria::create(
+            authenticatorAttachment: $this->config()->get('authenticator_attachment') ?: null
+        );
     }
 }
