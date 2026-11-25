@@ -16,10 +16,11 @@ use SilverStripe\WebAuthn\VerifyHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\Uuid;
 use Webauthn\AuthenticatorResponse;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
-use Webauthn\PublicKeyCredentialLoader;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\TrustPath\EmptyTrustPath;
 use SilverStripe\WebAuthn\ResponseDataException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -133,12 +134,12 @@ class VerifyHandlerTest extends SapphireTest
     ) {
         /** @var VerifyHandler&MockObject $handlerMock */
         $handlerMock = $this->getMockBuilder(VerifyHandler::class)
-            ->onlyMethods(['getPublicKeyCredentialLoader', 'getAuthenticatorAssertionResponseValidator'])
+            ->onlyMethods(['getSerializer', 'getAuthenticatorAssertionResponseValidator'])
             ->getMock();
 
-        $publicKeyCredentialSourceMock = $this->createMock(PublicKeyCredentialSource::class);
+        // webauthn-lib 5: check() returns the updated CredentialRecord, which verify() saves
         $responseValidatorMock = $this->createMock(AuthenticatorAssertionResponseValidator::class);
-        $responseValidatorMock->method('check')->willReturn($publicKeyCredentialSourceMock);
+        $responseValidatorMock->method('check')->willReturn(static::createTestRecord());
 
         // Allow the data provider to customise the validation check handling
         if ($responseValidatorMockCallback) {
@@ -150,17 +151,18 @@ class VerifyHandlerTest extends SapphireTest
         $loggerMock = $this->createMock(LoggerInterface::class);
         $handlerMock->setLogger($loggerMock);
 
-        $loaderMock = $this->createMock(PublicKeyCredentialLoader::class);
-        $handlerMock->expects($this->once())->method('getPublicKeyCredentialLoader')->willReturn($loaderMock);
+        // webauthn-lib 5 reads the credential through a serializer (PublicKeyCredentialLoader is gone)
+        $serializerMock = $this->createMock(SerializerInterface::class);
+        $handlerMock->expects($this->once())->method('getSerializer')->willReturn($serializerMock);
 
         $credentials = base64_encode(json_encode(['response' => ['authenticatorData' => 'foo']]));
 
-        $publicKeyCredentialMock = $this->createMock(PublicKeyCredential::class);
-        $loaderMock->expects($this->once())->method('load')->with(base64_decode($credentials))->willReturn(
-            $publicKeyCredentialMock
-        );
-
-        $publicKeyCredentialMock->expects($this->once())->method('getResponse')->willReturn($mockResponse);
+        // PublicKeyCredential exposes rawId and response as properties, so a real one carries the mock response. Its
+        // raw ID is that of the stored credential (setUp()): webauthn-lib 5 takes the stored record itself, which
+        // verify() now looks up by that ID (webauthn-lib 4 did the lookup inside the mocked validator)
+        $serializerMock->expects($this->once())->method('deserialize')
+            ->with(base64_decode($credentials), PublicKeyCredential::class, 'json')
+            ->willReturn(PublicKeyCredential::create('public-key', 'publicKeyCredentialId', $mockResponse));
 
         $this->request->setBody(json_encode(['credentials' => $credentials]));
         $result = $handlerMock->verify($this->request, $this->store, $this->registeredMethod);
@@ -196,9 +198,7 @@ class VerifyHandlerTest extends SapphireTest
                     $responseValidatorMock
                         ->expects($testCase->once())
                         ->method('check')
-                        ->willReturnCallback(function (): bool {
-                            return true;
-                        });
+                        ->willReturn(static::createTestRecord());
                 },
             ],
             'invalid response' => [
@@ -270,5 +270,24 @@ class VerifyHandlerTest extends SapphireTest
                 'exception' => false,
             ],
         ];
+    }
+
+    /**
+     * The credential stored in setUp() (raw values of its base64 fields), as the validator returns it after a login.
+     * PublicKeyCredentialSource is deprecated in webauthn-lib 5.3, so this is a CredentialRecord.
+     */
+    protected static function createTestRecord(): CredentialRecord
+    {
+        return CredentialRecord::create(
+            'publicKeyCredentialId',
+            'public-key',
+            [],
+            'none',
+            EmptyTrustPath::create(),
+            Uuid::fromString('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA'),
+            'publicKey',
+            'userHandle',
+            123456790
+        );
     }
 }
